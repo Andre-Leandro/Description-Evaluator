@@ -11,13 +11,21 @@ export default function MainTabs() {
     <div className="max-w-4xl mx-auto py-8">
       <div className="flex gap-4 mb-8">
         <button
-          className={`px-4 py-2 rounded-t-lg font-semibold ${tab === "comparacion" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+          className={`px-4 py-2 rounded-t-lg font-semibold transition-colors duration-200 border-b-2 ${
+            tab === "comparacion"
+              ? "bg-[#a9cce3] text-white border-[#a9cce3]"
+              : "bg-gray-100 text-gray-700 border-transparent hover:bg-[#a9cce3] hover:text-white"
+          }`}
           onClick={() => setTab("comparacion")}
         >
           Comparación de Modelos
         </button>
         <button
-          className={`px-4 py-2 rounded-t-lg font-semibold ${tab === "individual" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+          className={`px-4 py-2 rounded-t-lg font-semibold transition-colors duration-200 border-b-2 ${
+            tab === "individual"
+              ? "bg-[#a9cce3] text-white border-[#a9cce3]"
+              : "bg-gray-100 text-gray-700 border-transparent hover:bg-[#a9cce3] hover:text-white"
+          }`}
           onClick={() => setTab("individual")}
         >
           Calificación Individual
