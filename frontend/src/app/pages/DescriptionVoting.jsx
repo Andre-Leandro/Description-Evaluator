@@ -1,0 +1,105 @@
+"use client";
+
+import React, { useMemo, useState } from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+
+import data from "../description.json";
+
+export default function DescriptionVoting() {
+  const [index, setIndex] = useState(0);
+  const [votes, setVotes] = useState([]);
+  const [finished, setFinished] = useState(false);
+
+  const currentProduct = data.products[index];
+
+  const randomizedOptions = useMemo(() => {
+    return [...currentProduct.descriptions]
+      .map((desc) => ({ ...desc }))
+      .sort(() => Math.random() - 0.5);
+  }, [index]);
+
+  const handleVote = (model) => {
+    setVotes((prev) => [...prev, { productId: currentProduct.id, model }]);
+    if (index + 1 < data.products.length) {
+      setIndex(index + 1);
+    } else {
+      setFinished(true);
+    }
+  };
+
+  const results = useMemo(() => {
+    const summary = {};
+    for (const vote of votes) {
+      summary[vote.model] = (summary[vote.model] || 0) + 1;
+    }
+    return Object.entries(summary).map(([model, count]) => ({ model, count }));
+  }, [votes]);
+
+  if (finished) {
+    return (
+      <div className="max-w-4xl mx-auto text-center space-y-6">
+        <header className="p-6 bg-white sticky top-0 z-10 mb-10 flex flex-col items-center">
+            <h1 className="text-3xl font-semibold text-gray-800">Resultados de las Evaluaciones</h1>
+        </header>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={results}>
+            <XAxis dataKey="model" />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="count" fill="#8884d8" />
+          </BarChart>
+        </ResponsiveContainer>
+        <button
+          onClick={() => {
+            setIndex(0);
+            setVotes([]);
+            setFinished(false);
+          }}
+          className="mt-4 px-4 py-2 bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-xl shadow hover:500  transition font-semibold"
+        >
+          Reiniciar evaluación
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-6">
+      <header className="p-6 bg-white sticky top-0 z-10 mb-10 flex flex-col items-center">
+        <h1 className="text-3xl font-semibold text-gray-800">Evaluación de Descripciones</h1>
+      </header>
+      <div className="bg-gray-50 p-4 rounded-2xl border">
+        <p className="text-lg font-medium text-gray-700 mb-1">{currentProduct.name}</p>
+        <p className="text-gray-600 italic">{currentProduct.original}</p>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {randomizedOptions.map((desc, i) => (
+          <div
+            key={i}
+            onClick={() => handleVote(desc.model)}
+            className="cursor-pointer border rounded-xl p-4 hover:bg-gray-100 transition text-sm"
+          >
+            <p className="font-semibold mb-1">{desc.model}</p>
+            <p>{desc.text}</p>
+          </div>
+        ))}
+        <div
+          onClick={() => handleVote("Todas bien")}
+          className="cursor-pointer border rounded-2xl p-4 hover:bg-gray-100 transition text-sm text-center h-full flex items-center justify-center"
+        >
+          Todas están bien
+        </div>
+      </div>
+      <div className="flex justify-end gap-4">
+        <button
+          onClick={() => setFinished(true)}
+          className="px-4 py-2 bg-gradient-to-r from-green-400 to-green-600 text-white rounded-xl shadow hover:from-green-500 hover:to-green-700 transition font-semibold"
+        >
+          Terminar evaluación
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
