@@ -8,8 +8,9 @@ export default function MainTabs() {
   const [tab, setTab] = useState("comparacion");
 
   return (
-    <div className="max-w-4xl mx-auto py-8">
-      <div className="flex gap-4 mb-8">
+    <div className="max-w-screen-xl mx-auto py-8 px-4">
+
+      <div className="flex gap-4  ">
         <button
           className={`px-4 py-2 rounded-t-lg font-semibold transition-colors duration-200 border-b-2 ${
             tab === "comparacion"

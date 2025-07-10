@@ -3,29 +3,32 @@
 import React, { useMemo, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
-import data from "../description.json";
+import useProducts from "../../hooks/useProduct";
 
 export default function DescriptionVoting() {
+  const { products, loading, error } = useProducts();
   const [index, setIndex] = useState(0);
   const [votes, setVotes] = useState([]);
   const [finished, setFinished] = useState(false);
 
-  const currentProduct = data.products[index];
-
-  const randomizedOptions = useMemo(() => {
-    return [...currentProduct.descriptions]
-      .map((desc) => ({ ...desc }))
-      .sort(() => Math.random() - 0.5);
-  }, [index]);
+  // Hooks siempre arriba, nunca dentro de condicionales
+  const currentProduct = products && products.length > 0 ? products[index] : null;
 
   const handleVote = (model) => {
     setVotes((prev) => [...prev, { productId: currentProduct.id, model }]);
-    if (index + 1 < data.products.length) {
+    if (index + 1 < products.length) {
       setIndex(index + 1);
     } else {
       setFinished(true);
     }
   };
+
+  const randomizedOptions = useMemo(() => {
+    if (!currentProduct) return [];
+    return [...currentProduct.descriptions]
+      .map((desc) => ({ ...desc }))
+      .sort(() => Math.random() - 0.5);
+  }, [index, currentProduct]);
 
   const results = useMemo(() => {
     const summary = {};
@@ -35,13 +38,21 @@ export default function DescriptionVoting() {
     return Object.entries(summary).map(([model, count]) => ({ model, count }));
   }, [votes]);
 
+  // Ahora sí, retornos condicionales
+  if (loading) return <div>Cargando productos...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!products.length) return <div>No hay productos disponibles.</div>;
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6">
+      {/*
       <header className="p-6 bg-white sticky top-0 z-10 mb-10 flex flex-col items-center">
         <h1 className="text-3xl font-semibold text-gray-800">
           {finished ? "Resultados de las Evaluaciones" : "Evaluación de Descripciones"}
         </h1>
-      </header>
+      </header> 
+      **/ }
+
       {!finished ? (
         <>
           <div className="bg-gray-50 p-4 rounded-2xl border">
@@ -76,7 +87,7 @@ export default function DescriptionVoting() {
           </div>
         </>
       ) : (
-        <div className="max-w-4xl mx-auto text-center space-y-6">
+        <div className="max-w-4xl mx-auto text-center space-y-6 mt-18">
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={results}>
               <XAxis dataKey="model" />
