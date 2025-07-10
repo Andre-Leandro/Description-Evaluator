@@ -45,7 +45,6 @@ def get_products():
             "descriptions": descriptions
         })
 
-    print(products)  # <-- Esto te muestra en la terminal lo que vas a devolver
     return jsonify({"products": products})
 
 if __name__ == '__main__':
