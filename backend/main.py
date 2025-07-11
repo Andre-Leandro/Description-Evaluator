@@ -4,6 +4,11 @@ import pandas as pd
 import os
 import math
 
+port = int(os.environ.get("PORT", 5000))  # Usa PORT si está definido, sino 5000 por defecto
+
+
+
+
 app = Flask(__name__)
 CORS(app)
 
@@ -11,6 +16,11 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def read_csv_local(filename):
     return pd.read_csv(os.path.join(BASE_DIR, filename))
+
+@app.route('/')
+def home():
+    return "La API está corriendo correctamente."
+
 
 @app.route('/products', methods=['GET'])
 def get_products():
@@ -48,4 +58,4 @@ def get_products():
     return jsonify({"products": products})
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=5001)
+    app.run(debug=True)
