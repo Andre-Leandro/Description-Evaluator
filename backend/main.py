@@ -4,10 +4,7 @@ import pandas as pd
 import os
 import math
 
-port = int(os.environ.get("PORT", 5000))  # Usa PORT si está definido, sino 5000 por defecto
-
-
-
+port = int(os.environ.get("PORT", 10000))  # 10000 es el valor por defecto si no se define PORT
 
 app = Flask(__name__)
 CORS(app)
@@ -58,4 +55,4 @@ def get_products():
     return jsonify({"products": products})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=port, debug=False)

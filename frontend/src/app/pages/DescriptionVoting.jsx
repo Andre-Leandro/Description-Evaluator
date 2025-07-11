@@ -66,7 +66,7 @@ export default function DescriptionVoting() {
                 onClick={() => handleVote(desc.model)}
                 className="cursor-pointer border rounded-xl p-4 hover:bg-gray-100 transition text-sm"
               >
-                <p className="font-semibold mb-1">{desc.model}</p>
+               
                 <p>{desc.text}</p>
               </div>
             ))}
