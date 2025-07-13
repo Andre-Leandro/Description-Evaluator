@@ -3,6 +3,17 @@ from flask_cors import CORS
 import pandas as pd
 import os
 import math
+from dotenv import load_dotenv
+from flask import jsonify
+from models import Product, Description
+from sqlalchemy.orm import joinedload
+from db import engine
+from sqlalchemy.orm import sessionmaker
+
+load_dotenv()
+Session = sessionmaker(bind=engine)
+session = Session()
+
 
 port = int(os.environ.get("PORT", 10000))  # 10000 es el valor por defecto si no se define PORT
 
@@ -21,38 +32,45 @@ def home():
 
 @app.route('/products', methods=['GET'])
 def get_products():
-    df_claude = read_csv_local("description-parragraph-us.anthropic.claude-3-5-sonnet-20240620-v1_0.csv")
-    df_claude["modelo"] = "Claude 3.5 Sonnet"
+    try:
+        # Trae todos los productos que tienen al menos una descripción
+        products = (
+            session.query(Product)
+            .options(joinedload(Product.descriptions).joinedload(Description.model_ref))
+            .all()
+        )
 
-    df_nova_premier = read_csv_local("description-parragraph-us.amazon.nova-premier-v1_0.csv")
-    df_nova_premier["modelo"] = "Amazon Nova Premier"
+        result = []
 
-    df_nova_micro = read_csv_local("description-parragraph-us.amazon.nova-micro-v1_0.csv")
-    df_nova_micro["modelo"] = "Amazon Nova Micro"
+        for product in products:
+            if not product.descriptions:
+                continue  # Saltar productos sin descripciones
 
-    df_original = read_csv_local("productos_limpios.csv")  # columnas: nombre, descripcion_estandarizada
+            descriptions = [
+                {
+                    "model": desc.model_ref.name,
+                    "text": desc.generated_description
+                }
+                for desc in product.descriptions
+            ]
 
-    df_all = pd.concat([df_claude, df_nova_premier, df_nova_micro], ignore_index=True)
+            result.append({
+                "id": product.id,
+                "name": product.name,
+                "original": product.og_description,
+                "evaluated": product.evaluated,
+                "descriptions": descriptions
+            })
 
-    products = []
-    for i, row in df_original.iterrows():
-        nombre = row["nombre"]
-        original = row["descripcion_estandarizada"]
-        if isinstance(original, float) and math.isnan(original):
-            original = None
-        subset = df_all[df_all["nombre"] == nombre]
-        descriptions = [
-            {"model": r["modelo"], "text": r["descripcion_generada"]}
-            for _, r in subset.iterrows()
-        ]
-        products.append({
-            "id": i + 1,
-            "name": nombre,
-            "original": original,
-            "descriptions": descriptions
-        })
+        return jsonify({"products": result})
 
-    return jsonify({"products": products})
+    except Exception as e:
+        print(f"❌ Error al obtener productos: {e}")
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        session.close()
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=port, debug=False)

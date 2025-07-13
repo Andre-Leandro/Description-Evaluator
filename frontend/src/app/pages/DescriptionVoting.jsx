@@ -75,35 +75,46 @@ export default function DescriptionVoting() {
     </select>
 
     {/* Icono flechita */}
-    <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-      <svg
-        className="w-5 h-5 text-gray-400"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        viewBox="0 0 24 24"
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-      </svg>
-    </div>
-  </div>
-</div>
+          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+            <svg
+              className="w-5 h-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+      </div>
 
-  {/* Contador bonito a la derecha */}
-  <div className="flex items-center gap-2">
-    <span className="inline-block bg-[#a9cce3] text-white font-bold px-4 py-2 rounded-xl shadow">
-      {productsByPart.length > 0 ? index + 1 : 0} / {productsByPart.length}
-    </span>
-  </div>
-</div>
-
+        {/* Contador bonito a la derecha */}
+        <div className="flex items-center gap-2">
+          <span className="inline-block bg-[#a9cce3] text-white font-bold px-4 py-2 rounded-xl shadow">
+            {productsByPart.length > 0 ? index + 1 : 0} / {productsByPart.length}
+          </span>
+        </div>
+      </div>
 
       {!finished ? (
         <>
-          <div className="bg-gray-50 p-4 rounded-2xl border">
-            <p className="text-lg font-medium text-gray-700 mb-1">{currentProduct.name}</p>
+          <div className="bg-gray-50 p-4 rounded-2xl border space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-lg font-medium text-gray-700">{currentProduct.name}</p>
+              <span
+                className={`text-xs font-semibold px-3 py-1 rounded-full shadow ${
+                  currentProduct.evaluated
+                    ? "bg-green-100 text-green-800"
+                    : "bg-yellow-100 text-yellow-800"
+                }`}
+              >
+                {currentProduct.evaluated ? "Evaluado" : "Pendiente"}
+              </span>
+            </div>
             <p className="text-gray-600 italic">{currentProduct.original}</p>
           </div>
+         
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {randomizedOptions.map((desc, i) => (
               <div
