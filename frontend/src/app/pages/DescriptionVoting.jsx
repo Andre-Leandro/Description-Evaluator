@@ -12,7 +12,7 @@ export default function DescriptionVoting() {
   const [finished, setFinished] = useState(false);
   const [part, setPart] = useState(1);
   const { sendVote } = useVote();
-
+  const [filter, setFilter] = useState("all"); // "all" | "evaluated" | "pending"
 
 
 
@@ -43,11 +43,20 @@ export default function DescriptionVoting() {
 
   // Dividir el dataset según la parte seleccionada
   const productsByPart = useMemo(() => {
-    if (!products.length) return [];
-    if (part === 1) return products.slice(0, 375);
-    if (part === 2) return products.slice(375, 375 + 700);
-    return products.slice(375 + 700, 375 + 700 + 700);
-  }, [products, part]);
+  if (!products.length) return [];
+
+  let filtered = [...products];
+
+  if (filter === "evaluated") {
+    filtered = filtered.filter((p) => p.evaluated);
+  } else if (filter === "pending") {
+    filtered = filtered.filter((p) => !p.evaluated);
+  }
+
+  if (part === 1) return filtered.slice(0, 375);
+  if (part === 2) return filtered.slice(375, 375 + 700);
+  return filtered.slice(375 + 700, 375 + 700 + 700);
+}, [products, part, filter]);
 
   const currentProduct = productsByPart && productsByPart.length > 0 ? productsByPart[index] : null;
 
@@ -77,6 +86,21 @@ export default function DescriptionVoting() {
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Selector de parte y contador */}
       <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-4">
+          <label className="font-semibold whitespace-nowrap">Filtrar productos:</label>
+          <select
+            value={filter}
+            onChange={(e) => {
+              setFilter(e.target.value);
+              setIndex(0);
+            }}
+            className="appearance-none border rounded px-3 py-2 w-full pr-10 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          >
+            <option value="all">Todos</option>
+            <option value="evaluated">Solo evaluados</option>
+            <option value="pending">Solo pendientes</option>
+          </select>
+        </div>
   {/* Selector de parte a la izquierda */}
 
 <div className="flex items-center gap-4 mb-6">
