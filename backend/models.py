@@ -13,6 +13,8 @@ class Model(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     descriptions = relationship("Description", back_populates="model_ref")
+    products = relationship("Product", back_populates="model_ref")
+
 
 
 class Product(Base):
@@ -22,8 +24,10 @@ class Product(Base):
     name = Column(String, nullable=False)
     og_description = Column(Text)
     evaluated = Column(Boolean, default=False)
+    vote = Column(Integer, ForeignKey("model.id"), nullable=True)
 
     descriptions = relationship("Description", back_populates="product_ref")
+    model_ref = relationship("Model", back_populates="products")
 
 
 class Description(Base):

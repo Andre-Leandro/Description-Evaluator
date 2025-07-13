@@ -9,6 +9,7 @@ from models import Product, Description
 from sqlalchemy.orm import joinedload
 from db import engine
 from sqlalchemy.orm import sessionmaker
+from flask import request
 
 load_dotenv()
 Session = sessionmaker(bind=engine)
@@ -49,7 +50,8 @@ def get_products():
             descriptions = [
                 {
                     "model": desc.model_ref.name,
-                    "text": desc.generated_description
+                    "text": desc.generated_description,
+                    "model_id": desc.model_ref.id,
                 }
                 for desc in product.descriptions
             ]
@@ -68,6 +70,34 @@ def get_products():
         print(f"❌ Error al obtener productos: {e}")
         return jsonify({"error": str(e)}), 500
 
+    finally:
+        session.close()
+
+
+@app.route("/vote", methods=["POST"])
+def register_vote():
+    data = request.get_json()
+    print(data)
+
+    required_fields = ["id", "model_id"]
+    if not all(field in data for field in required_fields):
+        return {"error": "Faltan campos obligatorios."}, 400
+
+    session = Session()
+    try:
+        product = session.query(Product).filter_by(id=data["id"]).first()
+        if not product:
+            return {"error": "Producto no encontrado."}, 404
+
+        product.evaluated = True
+        product.vote = data["model_id"]  # Esto debe ser una ForeignKey al modelo
+
+        session.commit()
+        return {"message": "Voto registrado correctamente."}, 200
+
+    except Exception as e:
+        session.rollback()
+        return {"error": str(e)}, 500
     finally:
         session.close()
 

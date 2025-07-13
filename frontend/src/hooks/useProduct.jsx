@@ -8,7 +8,7 @@ export default function useProducts() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch(API_URL)
+    fetch(`${API_URL}/products`)
       .then((res) => res.json())
       .then((data) => {
         console.log("Respuesta del backend:", data);

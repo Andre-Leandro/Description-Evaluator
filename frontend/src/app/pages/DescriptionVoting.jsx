@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import useProducts from "../../hooks/useProduct";
+import useVote from "../../hooks/useVote";
 
 export default function DescriptionVoting() {
   const { products, loading, error } = useProducts();
@@ -10,6 +11,35 @@ export default function DescriptionVoting() {
   const [votes, setVotes] = useState([]);
   const [finished, setFinished] = useState(false);
   const [part, setPart] = useState(1);
+  const { sendVote } = useVote();
+
+
+
+
+  const handleVote = async (modelName, modelId) => {
+  console.log(modelId)
+  console.log(currentProduct.id)
+
+  // 1. Enviar voto al backend
+  await sendVote({
+    id: currentProduct.id,
+    model_id: modelId,
+  });
+
+  // 2. Registrar el voto localmente (para la gráfica de resultados)
+  setVotes((prev) => [...prev, { productId: currentProduct.id, model: modelName }]);
+
+  // 3. Marcar evaluado (si querés actualizar también localmente)
+  
+
+  // 4. Avanzar o finalizar
+  if (index + 1 < productsByPart.length) {
+    setIndex(index + 1);
+  } else {
+    setFinished(true);
+  }
+};
+
 
   // Dividir el dataset según la parte seleccionada
   const productsByPart = useMemo(() => {
@@ -21,14 +51,7 @@ export default function DescriptionVoting() {
 
   const currentProduct = productsByPart && productsByPart.length > 0 ? productsByPart[index] : null;
 
-  const handleVote = (model) => {
-    setVotes((prev) => [...prev, { productId: currentProduct.id, model }]);
-    if (index + 1 < productsByPart.length) {
-      setIndex(index + 1);
-    } else {
-      setFinished(true);
-    }
-  };
+
 
   const randomizedOptions = useMemo(() => {
     if (!currentProduct) return [];
@@ -119,14 +142,14 @@ export default function DescriptionVoting() {
             {randomizedOptions.map((desc, i) => (
               <div
                 key={i}
-                onClick={() => handleVote(desc.model)}
+                onClick={() => handleVote(desc.model, desc.model_id)}
                 className="cursor-pointer border rounded-xl p-4 hover:bg-gray-100 transition text-sm"
               >
                 <p>{desc.text}</p>
               </div>
             ))}
             <div
-              onClick={() => handleVote("Todas bien")}
+              onClick={() => handleVote("Todas bien", 0)}
               className="cursor-pointer border rounded-2xl p-4 hover:bg-gray-100 transition text-sm text-center h-full flex items-center justify-center"
             >
               Todas están bien
