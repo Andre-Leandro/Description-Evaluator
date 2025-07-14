@@ -2,8 +2,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.pool import NullPool
 from dotenv import load_dotenv
 import os
-from sqlalchemy.orm import sessionmaker
-
 # Load environment variables from .env
 load_dotenv()
 

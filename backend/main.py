@@ -2,7 +2,6 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 import pandas as pd
 import os
-import math
 from dotenv import load_dotenv
 from flask import jsonify
 from models import Product, Description
