@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useMemo, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import useProducts from "../../hooks/useProduct";
@@ -14,25 +13,12 @@ export default function DescriptionVoting() {
   const { sendVote } = useVote();
   const [filter, setFilter] = useState("all"); // "all" | "evaluated" | "pending"
 
-
-
   const handleVote = async (modelName, modelId) => {
-  console.log(modelId)
-  console.log(currentProduct.id)
-
-  // 1. Enviar voto al backend
   await sendVote({
     id: currentProduct.id,
     model_id: modelId,
   });
-
-  // 2. Registrar el voto localmente (para la gráfica de resultados)
   setVotes((prev) => [...prev, { productId: currentProduct.id, model: modelName }]);
-
-  // 3. Marcar evaluado (si querés actualizar también localmente)
-  
-
-  // 4. Avanzar o finalizar
   if (index + 1 < productsByPart.length) {
     setIndex(index + 1);
   } else {
@@ -40,27 +26,26 @@ export default function DescriptionVoting() {
   }
 };
 
-
   // Dividir el dataset según la parte seleccionada
   const productsByPart = useMemo(() => {
   if (!products.length) return [];
-
   let filtered = [...products];
-
+  if (part === 1) {
+    filtered = filtered.slice(0, 375);
+  } else if (part === 2) {
+    filtered = filtered.slice(375, 375 + 700);
+  } else if (part === 3) {
+    filtered = filtered.slice(375 + 700, 375 + 700 + 700);
+  }
   if (filter === "evaluated") {
     filtered = filtered.filter((p) => p.evaluated);
   } else if (filter === "pending") {
     filtered = filtered.filter((p) => !p.evaluated);
   }
-
-  if (part === 1) return filtered.slice(0, 375);
-  if (part === 2) return filtered.slice(375, 375 + 700);
-  return filtered.slice(375 + 700, 375 + 700 + 700);
+  return filtered;
 }, [products, part, filter]);
 
   const currentProduct = productsByPart && productsByPart.length > 0 ? productsByPart[index] : null;
-
-
 
   const randomizedOptions = useMemo(() => {
     if (!currentProduct) return [];
@@ -77,64 +62,74 @@ export default function DescriptionVoting() {
     return Object.entries(summary).map(([model, count]) => ({ model, count }));
   }, [votes]);
 
-  // Ahora sí, retornos condicionales
   if (loading) return <div>Cargando productos...</div>;
   if (error) return <div>Error: {error}</div>;
-  if (!productsByPart.length) return <div>No hay productos disponibles.</div>;
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Selector de parte y contador */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <label className="font-semibold whitespace-nowrap">Filtrar productos:</label>
-          <select
-            value={filter}
-            onChange={(e) => {
-              setFilter(e.target.value);
-              setIndex(0);
-            }}
-            className="appearance-none border rounded px-3 py-2 w-full pr-10 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          >
-            <option value="all">Todos</option>
-            <option value="evaluated">Solo evaluados</option>
-            <option value="pending">Solo pendientes</option>
-          </select>
-        </div>
-  {/* Selector de parte a la izquierda */}
-
-<div className="flex items-center gap-4 mb-6">
-  <label className="font-semibold whitespace-nowrap">Seleccionar parte del dataset:</label>
-  <div className="relative w-56">
-    <select
-      value={part}
-      onChange={e => {
-        setPart(Number(e.target.value));
-        setIndex(0);
-        setVotes([]);
-        setFinished(false);
-      }}
-      className="appearance-none border rounded px-3 py-2 w-full pr-10 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
-    >
-      <option value={1}>Parte 1 (1–375)</option>
-      <option value={2}>Parte 2 (376–1075)</option>
-      <option value={3}>Parte 3 (1076–1775)</option>
-    </select>
-
-    {/* Icono flechita */}
-          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-            <svg
-              className="w-5 h-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
+          <div className="relative w-56">
+            <select
+              value={filter}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setIndex(0);
+              }}
+              className="appearance-none border rounded px-3 py-2 w-full pr-10 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
+              <option value="all">Todos</option>
+              <option value="evaluated">Solo evaluados</option>
+              <option value="pending">Solo pendientes</option>
+            </select>
+            {/* Icono flechita */}
+            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+              <svg
+                className="w-5 h-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </div>
         </div>
-      </div>
+        {/* Selector de parte a la izquierda */}
+        <div className="flex items-center gap-4 ">
+          <label className="font-semibold whitespace-nowrap">Seleccionar parte del dataset:</label>
+          <div className="relative w-56">
+            <select
+              value={part}
+              onChange={e => {
+                setPart(Number(e.target.value));
+                setIndex(0);
+                setVotes([]);
+                setFinished(false);
+              }}
+              className="appearance-none border rounded px-3 py-2 w-full pr-10 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              <option value={1}>Parte 1 (1–375)</option>
+              <option value={2}>Parte 2 (376–1075)</option>
+              <option value={3}>Parte 3 (1076–1775)</option>
+            </select>
+             {/* Icono flechita */}
+              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                <svg
+                  className="w-5 h-5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
 
         {/* Contador bonito a la derecha */}
         <div className="flex items-center gap-2">
@@ -143,8 +138,8 @@ export default function DescriptionVoting() {
           </span>
         </div>
       </div>
-
-      {!finished ? (
+      {(!productsByPart.length) ? (<div>No hay productos disponibles.</div>) : 
+      !finished ? (
         <>
           <div className="bg-gray-50 p-4 rounded-2xl border space-y-2">
             <div className="flex items-center justify-between">
@@ -229,5 +224,3 @@ export default function DescriptionVoting() {
     </div>
   );
 }
-
-

@@ -31,6 +31,16 @@ export default function MainTabs() {
         >
           Calificación Individual
         </button>
+        <button
+          className={`px-4 py-2 rounded-t-lg font-semibold transition-colors duration-200 border-b-2 ${
+            tab === "resultados"
+              ? "bg-[#a9cce3] text-white border-[#a9cce3]"
+              : "bg-gray-100 text-gray-700 border-transparent hover:bg-[#a9cce3] hover:text-white"
+          }`}
+          onClick={() => setTab("resultados")}
+        >
+          Resultados
+        </button>
       </div>
       <div className="bg-white rounded-b-xl shadow p-6">
         {tab === "comparacion" && <DescriptionVoting />}
