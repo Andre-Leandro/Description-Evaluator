@@ -39,7 +39,6 @@ def get_products():
             .options(joinedload(Product.descriptions).joinedload(Description.model_ref))
             .all()
         )
-
         result = []
 
         for product in products:
@@ -60,6 +59,7 @@ def get_products():
                 "name": product.name,
                 "original": product.og_description,
                 "evaluated": product.evaluated,
+                "vote": product.vote,
                 "descriptions": descriptions
             })
 

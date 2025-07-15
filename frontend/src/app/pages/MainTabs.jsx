@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import DescriptionVoting from "./DescriptionVoting";
 import ModelIndividualRating from "./ModelIndividualRating";
+import Results from "./Results";
 
 export default function MainTabs() {
   const [tab, setTab] = useState("comparacion");
@@ -45,6 +46,7 @@ export default function MainTabs() {
       <div className="bg-white rounded-b-xl shadow p-6">
         {tab === "comparacion" && <DescriptionVoting />}
         {tab === "individual" && <ModelIndividualRating />}
+        {tab === "resultados" && <Results />}
       </div>
     </div>
   );
