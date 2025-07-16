@@ -36,7 +36,8 @@ def get_products():
         # Trae todos los productos que tienen al menos una descripción
         products = (
             session.query(Product)
-            .options(joinedload(Product.descriptions).joinedload(Description.model_ref))
+            .options(joinedload(Product.descriptions).joinedload(Description.model_ref),
+                     joinedload(Product.model_ref))
             .all()
         )
         result = []
@@ -59,7 +60,7 @@ def get_products():
                 "name": product.name,
                 "original": product.og_description,
                 "evaluated": product.evaluated,
-                "vote": product.vote,
+                "vote": product.model_ref.name if product.model_ref else None,
                 "descriptions": descriptions
             })
 
