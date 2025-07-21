@@ -19,21 +19,26 @@ class FileService:
             
             # Save file
             file_path = os.path.join(csv_dir, filename)
-            
+
             # If file_data is bytes, save directly
             if isinstance(file_data, bytes):
-                with open(file_path, 'wb') as f:
-                    f.write(file_data)
+                # Comentado todo el bloque de escritura
+                # with open(file_path, 'wb') as f:
+                #     print("Saving file to directory:", csv_dir)
+                #     f.write(file_data)
+                print("Debug: Skipping file write for bytes")
             else:
-                # If it's a file object, save its content
-                with open(file_path, 'wb') as f:
-                    f.write(file_data.read())
+                # Comentado todo el bloque de escritura
+                # with open(file_path, 'wb') as f:
+                #     print("Saving file to directory:", csv_dir)
+                #     f.write(file_data.read())
+                print("Debug: Skipping file write for file object")
             
             return {
                 "filename": filename,
                 "path": file_path,
-                "size": os.path.getsize(file_path),
-                "message": f"Archivo {filename} guardado correctamente"
+                "size": 0,  # Cambiado a 0 ya que no se escribe el archivo
+                "message": f"Archivo {filename} NO guardado (modo debug)"
             }
         except Exception as e:
             raise Exception(f"Error al guardar archivo: {str(e)}")
