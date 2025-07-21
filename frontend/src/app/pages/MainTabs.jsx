@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import DescriptionVoting from "./DescriptionVoting";
 import ModelIndividualRating from "./ModelIndividualRating";
 import Results from "./Results";
+import CSVUpload from "./CSVUpload";
 
 export default function MainTabs() {
   const [tab, setTab] = useState("comparacion");
@@ -42,11 +43,22 @@ export default function MainTabs() {
         >
           Resultados
         </button>
+        <button
+          className={`px-4 py-2 rounded-t-lg font-semibold transition-colors duration-200 border-b-2 ${
+            tab === "upload"
+              ? "bg-[#a9cce3] text-white border-[#a9cce3]"
+              : "bg-gray-100 text-gray-700 border-transparent hover:bg-[#a9cce3] hover:text-white"
+          }`}
+          onClick={() => setTab("upload")}
+        >
+          Subir CSV
+        </button>
       </div>
       <div className="bg-white rounded-b-xl shadow p-6">
         {tab === "comparacion" && <DescriptionVoting />}
         {tab === "individual" && <ModelIndividualRating />}
         {tab === "resultados" && <Results />}
+        {tab === "upload" && <CSVUpload />}
       </div>
     </div>
   );
