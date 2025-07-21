@@ -98,58 +98,60 @@ export default function DescriptionVoting() {
     <div className="max-w-7xl mx-auto space-y-6 relative">
       {/* Sidebar Navigation */}
       {showSidebar && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setShowSidebar(false)}>
-          <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-lg z-50 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="p-4 border-b">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Navegación de Preguntas</h3>
-                <button
-                  onClick={() => setShowSidebar(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  ✕
-                </button>
-              </div>
+        <div 
+          className={`fixed left-0 top-0 h-full w-80 bg-white shadow-lg z-50 overflow-y-auto transform transition-transform duration-300 ${
+            showSidebar ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
+          <div className="p-4 border-b">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Navegación de Preguntas</h3>
+              <button
+                onClick={() => setShowSidebar(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
             </div>
-            <div className="p-4">
-              <div className="grid grid-cols-5 gap-2">
-                {productsByPart.map((product, idx) => {
-                  const isAnswered = votes.some(v => v.productId === product.id);
-                  const isSkipped = skipped.some(s => s.productId === product.id);
-                  const isCurrent = idx === index;
-                  
-                  return (
-                    <button
-                      key={product.id}
-                      onClick={() => goToQuestion(idx)}
-                      className={`w-10 h-10 rounded text-sm font-medium transition ${
-                        isCurrent 
-                          ? "bg-blue-500 text-white" 
-                          : isAnswered 
-                            ? "bg-green-100 text-green-800" 
-                            : isSkipped
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                      }`}
-                    >
-                      {idx + 1}
-                    </button>
-                  );
-                })}
+          </div>
+          <div className="p-4">
+            <div className="grid grid-cols-5 gap-2">
+              {productsByPart.map((product, idx) => {
+                const isAnswered = votes.some(v => v.productId === product.id);
+                const isSkipped = skipped.some(s => s.productId === product.id);
+                const isCurrent = idx === index;
+                
+                return (
+                  <button
+                    key={product.id}
+                    onClick={() => goToQuestion(idx)}
+                    className={`w-10 h-10 rounded text-sm font-medium transition ${
+                      isCurrent 
+                        ? "bg-blue-500 text-white" 
+                        : isAnswered 
+                          ? "bg-green-100 text-green-800" 
+                          : isSkipped
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    {idx + 1}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-4 text-sm text-gray-600">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-4 h-4 bg-green-100 rounded"></div>
+                <span>Respondidas: {votes.length}</span>
               </div>
-              <div className="mt-4 text-sm text-gray-600">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-4 h-4 bg-green-100 rounded"></div>
-                  <span>Respondidas: {votes.length}</span>
-                </div>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-4 h-4 bg-yellow-100 rounded"></div>
-                  <span>Saltadas: {skipped.length}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-gray-100 rounded"></div>
-                  <span>Pendientes: {productsByPart.length - votes.length - skipped.length}</span>
-                </div>
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-4 h-4 bg-yellow-100 rounded"></div>
+                <span>Saltadas: {skipped.length}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-gray-100 rounded"></div>
+                <span>Pendientes: {productsByPart.length - votes.length - skipped.length}</span>
               </div>
             </div>
           </div>
