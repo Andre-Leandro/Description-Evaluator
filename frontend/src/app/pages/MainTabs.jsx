@@ -1,65 +1,38 @@
 "use client";
 
 import React, { useState } from "react";
+import dynamic from 'next/dynamic';
 import DescriptionVoting from "./DescriptionVoting";
 import ModelIndividualRating from "./ModelIndividualRating";
 import Results from "./Results";
 import CSVUpload from "./CSVUpload";
 
+// Dynamically import Sidebar with SSR disabled to avoid hydration issues
+const Sidebar = dynamic(() => import('@/components/Sidebar'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-16 h-screen bg-white border-r border-gray-200 flex items-center justify-center">
+      <div className="animate-pulse w-8 h-8 bg-gray-200 rounded"></div>
+    </div>
+  ),
+});
+
 export default function MainTabs() {
-  const [tab, setTab] = useState("comparacion");
+  const [activeTab, setActiveTab] = useState("comparacion");
 
   return (
-    <div className="max-w-screen-xl mx-auto py-8 px-4">
-
-      <div className="flex gap-4  ">
-        <button
-          className={`px-4 py-2 rounded-t-lg font-semibold transition-colors duration-200 border-b-2 ${
-            tab === "comparacion"
-              ? "bg-[#a9cce3] text-white border-[#a9cce3]"
-              : "bg-gray-100 text-gray-700 border-transparent hover:bg-[#a9cce3] hover:text-white"
-          }`}
-          onClick={() => setTab("comparacion")}
-        >
-          Comparación de Modelos
-        </button>
-        <button
-          className={`px-4 py-2 rounded-t-lg font-semibold transition-colors duration-200 border-b-2 ${
-            tab === "individual"
-              ? "bg-[#a9cce3] text-white border-[#a9cce3]"
-              : "bg-gray-100 text-gray-700 border-transparent hover:bg-[#a9cce3] hover:text-white"
-          }`}
-          onClick={() => setTab("individual")}
-        >
-          Calificación Individual
-        </button>
-        <button
-          className={`px-4 py-2 rounded-t-lg font-semibold transition-colors duration-200 border-b-2 ${
-            tab === "resultados"
-              ? "bg-[#a9cce3] text-white border-[#a9cce3]"
-              : "bg-gray-100 text-gray-700 border-transparent hover:bg-[#a9cce3] hover:text-white"
-          }`}
-          onClick={() => setTab("resultados")}
-        >
-          Resultados
-        </button>
-        <button
-          className={`px-4 py-2 rounded-t-lg font-semibold transition-colors duration-200 border-b-2 ${
-            tab === "upload"
-              ? "bg-[#a9cce3] text-white border-[#a9cce3]"
-              : "bg-gray-100 text-gray-700 border-transparent hover:bg-[#a9cce3] hover:text-white"
-          }`}
-          onClick={() => setTab("upload")}
-        >
-          Subir CSV
-        </button>
-      </div>
-      <div className="bg-white rounded-b-xl shadow p-6">
-        {tab === "comparacion" && <DescriptionVoting />}
-        {tab === "individual" && <ModelIndividualRating />}
-        {tab === "resultados" && <Results />}
-        {tab === "upload" && <CSVUpload />}
-      </div>
-    </div>
+    <>
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <main className="flex-1 overflow-auto p-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            {activeTab === "comparacion" && <DescriptionVoting />}
+            {activeTab === "individual" && <ModelIndividualRating />}
+            {activeTab === "resultados" && <Results />}
+            {activeTab === "upload" && <CSVUpload />}
+          </div>
+        </div>
+      </main>
+    </>
   );
 }
