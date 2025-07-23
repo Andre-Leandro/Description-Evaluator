@@ -94,7 +94,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
                   })}
                 </span>
                 {!isCollapsed && (
-                  <span className="font-medium">{item.name}</span>
+                  <span className="font-medium">{}</span>
                 )}
                 {isCollapsed ? (
                   <span className="flex items-center justify-center w-8 h-8">
