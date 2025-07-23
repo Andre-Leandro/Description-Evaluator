@@ -1,3 +1,5 @@
+'use client';
+
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import useProducts from "../../hooks/useProduct";
 

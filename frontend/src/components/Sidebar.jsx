@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Menu, 
   X, 
@@ -19,42 +19,47 @@ const navItems = [
   { 
     name: 'Inicio', 
     path: '/', 
-    tab: 'inicio',
     icon: <Home className="w-5 h-5" />
   },
   { 
     name: 'Comparación', 
-    path: '/', 
-    tab: 'comparacion',
+    path: '/comparacion',
     icon: <GitCompare className="w-5 h-5" />
   },
   { 
     name: 'Calificación', 
-    path: '/', 
-    tab: 'individual',
+    path: '/calificacion',
     icon: <Star className="w-5 h-5" />
   },
   { 
     name: 'Resultados', 
-    path: '/', 
-    tab: 'resultados',
+    path: '/resultados',
     icon: <BarChart2 className="w-5 h-5" />
   },
   { 
     name: 'Subir CSV', 
-    path: '/', 
-    tab: 'upload',
+    path: '/subir-csv',
     icon: <Upload className="w-5 h-5" />
   },
 ];
 
-export default function Sidebar({ activeTab, setActiveTab }) {
+export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
+    // Save preference to localStorage
+    localStorage.setItem('sidebarCollapsed', !isCollapsed);
   };
+
+  useEffect(() => {
+    // Load sidebar state from localStorage
+    const savedState = localStorage.getItem('sidebarCollapsed');
+    if (savedState !== null) {
+      setIsCollapsed(savedState === 'true');
+    }
+  }, []);
 
   return (
     <div className={`h-screen flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
@@ -74,41 +79,35 @@ export default function Sidebar({ activeTab, setActiveTab }) {
       </div>
       <nav className="flex-1 overflow-y-auto">
         <ul className="space-y-1 p-2">
-          {navItems.map((item) => (
-            <li key={item.tab}>
-              <Link
-                href={item.path}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActiveTab(item.tab);
-                }}
-                className={`flex items-center p-3 rounded-md transition-colors ${
-                  activeTab === item.tab
-                    ? 'bg-[#a9cce3] text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <span className={`${isCollapsed ? 'mx-auto' : 'mr-3'}`}>
-                  {React.cloneElement(item.icon, {
-                    className: `w-5 h-5 ${activeTab === item.tab ? 'text-white' : 'text-gray-500'}`
-                  })}
-                </span>
-                {!isCollapsed && (
-                  <span className="font-medium">{}</span>
-                )}
-                {isCollapsed ? (
-                  <span className="flex items-center justify-center w-8 h-8">
-                    {}
+          {navItems.map((item) => {
+            const isActive = pathname === item.path || 
+                          (item.path !== '/' && pathname.startsWith(item.path));
+            
+            return (
+              <li key={item.path} className="group">
+                <Link
+                  href={item.path}
+                  className={`flex items-center p-3 rounded-md transition-colors ${
+                    isActive
+                      ? 'bg-[#a9cce3] text-white'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <span className={`w-6 flex-shrink-0 flex items-center justify-center`}>
+                    {React.cloneElement(item.icon, {
+                      className: `w-5 h-5 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-700'}`
+                    })}
                   </span>
-                ) : (
-                  <span className="flex items-center">
-                    <span className="mr-3">{item.name}</span>
-                    {activeTab === item.tab && <ChevronRight size={16} className="ml-auto" />}
+                  <span className={`ml-3 transition-opacity duration-200 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100'}`}>
+                    {item.name}
                   </span>
-                )}
-              </Link>
-            </li>
-          ))}
+                  {!isCollapsed && (
+                    <ChevronRight className={`w-4 h-4 ml-auto transition-transform ${isActive ? 'text-white' : 'text-gray-400'}`} />
+                  )}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </nav>
       {!isCollapsed && (
