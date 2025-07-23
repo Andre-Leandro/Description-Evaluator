@@ -77,8 +77,8 @@ export default function Sidebar() {
           {isCollapsed ? <Menu size={20} /> : <X size={20} />}
         </button>
       </div>
-      <nav className="flex-1 overflow-y-auto">
-        <ul className="space-y-1 p-2">
+      <nav className="flex-1 overflow-hidden hover:overflow-y-auto">
+        <ul className="space-y-1 p-2 pr-1">
           {navItems.map((item) => {
             const isActive = pathname === item.path || 
                           (item.path !== '/' && pathname.startsWith(item.path));
@@ -112,8 +112,7 @@ export default function Sidebar() {
       </nav>
       {!isCollapsed && (
         <div className="p-4 border-t border-gray-200 text-xs text-gray-500">
-          <p>Description Evaluator</p>
-          <p>v1.0.0</p>
+          <p>Description Evaluator v1.0.0</p>
         </div>
       )}
     </div>
