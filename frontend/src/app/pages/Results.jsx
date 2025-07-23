@@ -23,7 +23,7 @@ export default function Results() {
 
 
   return (
-   <div className="max-w-7xl mx-auto space-y-4">
+   <div className="max-w-7xl mx-auto space-y-4 mt-18">
       <div className="flex justify-end mb-8">
         <span className="inline-block bg-[#a9cce3] text-white font-bold px-4 py-2 rounded-xl shadow">
           Evaluados: {evaluated.length} / {products.length}

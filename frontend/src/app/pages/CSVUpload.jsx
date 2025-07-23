@@ -72,7 +72,7 @@ export default function CSVUpload() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-6">
+    <div className="max-w-2xl mx-auto p-6 space-y-6 mt-18">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Subir Archivo CSV</h2>
         <p className="text-gray-600">Selecciona o arrastra un archivo CSV para subir al servidor</p>
