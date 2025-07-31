@@ -18,7 +18,10 @@ export default function DescriptionVoting() {
 
   const handleVote = async (modelName, modelId) => {
     if (!currentProduct) return;
-    
+    console.log(modelId)
+    console.log(selectedCondition)
+    console.log(currentProduct.id)
+
     try {
       // Enviar el voto al servidor
       await sendVote({
@@ -416,7 +419,7 @@ export default function DescriptionVoting() {
               {randomizedOptions.map((desc, i) => (
                 <div
                   key={i}
-                  onClick={() => handleVote(desc.model, desc.model_id)}
+                  onClick={() => handleVote(desc.model, desc.model.id)}
                   className="cursor-pointer border rounded-xl p-4 hover:bg-gray-50 transition text-sm sm:text-base bg-white shadow-sm hover:shadow-md"
                 >
                   <p className="text-gray-800">{desc.generated_description}</p>

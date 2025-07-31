@@ -125,7 +125,7 @@ class ProductService:
             session.close()
 
     @staticmethod
-    def register_vote(product_id, model_id, condition_id=1):
+    def register_vote(product_id, model_id, condition_id):
         """
         Register a vote for a product
         
@@ -153,17 +153,14 @@ class ProductService:
             # Check if condition exists
             condition = session.query(Condition).get(condition_id)
             if not condition:
-                # Create a default condition if it doesn't exist
-                condition = Condition(description="Default condition", temperature=0)
-                session.add(condition)
-                session.flush()  # To get the ID
+                raise ValueError(f"Condition with ID {condition_id} not found")
             
             # Check if an evaluation already exists for this product and condition
             evaluation = (
                 session.query(Evaluation)
                 .filter(
                     Evaluation.product == product_id,  # Using 'product' instead of 'product_id'
-                    Evaluation.condition_id == condition_id
+                    Evaluation.condition == condition_id
                 )
                 .first()
             )
@@ -175,9 +172,8 @@ class ProductService:
             else:
                 # Create new evaluation
                 evaluation = Evaluation(
-                    product_id=product_id,
-                    model_id=model_id,
-                    condition_id=condition.id,
+                    product=product_id,
+                    condition=condition_id,
                     vote=model_id,
                     evaluated=True
                 )
