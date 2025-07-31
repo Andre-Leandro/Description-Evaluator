@@ -1,5 +1,5 @@
-from models import Product, Description
-from sqlalchemy.orm import joinedload
+from models import Product, Description, Model, Condition, Evaluation
+from sqlalchemy.orm import joinedload, subqueryload
 from db import engine
 from sqlalchemy.orm import sessionmaker
 import os
@@ -13,87 +13,78 @@ else:
 class ProductService:
     @staticmethod
     def get_all_products():
-        """Get all products with their descriptions"""
+        """Get all products with their descriptions and evaluations"""
         if not Session:
             # Return mock data for development
             return [
                 {
                     "id": 1,
                     "name": "Sample Product 1",
-                    "original": "Original description for product 1",
+                    "og_description": "Original description for product 1",
                     "evaluated": False,
                     "vote": None,
                     "descriptions": [
-                        {"model": "Model A", "text": "Generated description A", "model_id": 1},
-                        {"model": "Model B", "text": "Generated description B", "model_id": 2}
-                    ]
-                },
-                {
-                    "id": 2,
-                    "name": "Sample Product 2",
-                    "original": "Original description for product 2",
-                    "evaluated": True,
-                    "vote": "Model A",
-                    "descriptions": [
-                        {"model": "Model A", "text": "Generated description A", "model_id": 1},
-                        {"model": "Model B", "text": "Generated description B", "model_id": 2}
-                    ]
+                        {"model": {"id": 1, "name": "Model A"}, "generated_description": "Generated description A"},
+                        {"model": {"id": 2, "name": "Model B"}, "generated_description": "Generated description B"}
+                    ],
+                    "evaluations": []
                 }
             ]
         
         session = Session()
         try:
-            # Trae todos los productos que tienen al menos una descripción
+            # Get all products with their descriptions and evaluations
             products = (
                 session.query(Product)
-                .options(joinedload(Product.descriptions).joinedload(Description.model_ref),
-                         joinedload(Product.model_ref))
+                .options(
+                    subqueryload(Product.descriptions).joinedload(Description.model_ref),
+                    subqueryload(Product.descriptions).joinedload(Description.condition_ref),
+                    subqueryload(Product.evaluations).joinedload(Evaluation.model_ref),
+                    subqueryload(Product.evaluations).joinedload(Evaluation.condition_ref)
+                )
                 .all()
             )
+            
             result = []
-
             for product in products:
-                if not product.descriptions:
-                    continue  # Saltar productos sin descripciones
-
-                descriptions = [
-                    {
-                        "model": desc.model_ref.name,
-                        "text": desc.generated_description,
-                        "model_id": desc.model_ref.id,
-                    }
-                    for desc in product.descriptions
-                ]
-
-                result.append({
-                    "id": product.id,
-                    "name": product.name,
-                    "original": product.og_description,
-                    "evaluated": product.evaluated,
-                    "vote": product.model_ref.name if product.model_ref else None,
-                    "descriptions": descriptions
-                })
-
+                # Convert product to dict with all relationships
+                product_dict = product.to_dict(include_descriptions=True, include_evaluations=True)
+                
+                # For backward compatibility, include the first evaluation's vote if any
+                if product.evaluations:
+                    first_eval = product.evaluations[0]
+                    product_dict["evaluated"] = first_eval.evaluated # Mal
+                    product_dict["vote"] = first_eval.vote
+                else:
+                    product_dict["evaluated"] = False
+                    product_dict["vote"] = None
+                
+                result.append(product_dict)
+                
             return result
+        except Exception as e:
+            print(f"Error in get_all_products: {str(e)}")
+            raise
         finally:
             session.close()
 
     @staticmethod
     def get_product_by_id(product_id):
-        """Get a single product by ID"""
+        """Get a single product by ID with all its descriptions and evaluations"""
         if not Session:
             # Return mock data for development
             if product_id == 1:
                 return {
                     "id": 1,
                     "name": "Sample Product 1",
-                    "original": "Original description for product 1",
+                    "og_description": "Original description for product 1",
                     "evaluated": False,
                     "vote": None,
                     "descriptions": [
-                        {"model": "Model A", "text": "Generated description A", "model_id": 1},
-                        {"model": "Model B", "text": "Generated description B", "model_id": 2}
-                    ]
+                        {"model": {"id": 1, "name": "Model A"}, "generated_description": "Generated description A"},
+                        {"model": {"id": 2, "name": "Model B"}, "generated_description": "Generated description B"}
+                    ],
+                    "evaluations": []
                 }
             return None
         
@@ -101,56 +92,103 @@ class ProductService:
         try:
             product = (
                 session.query(Product)
-                .options(joinedload(Product.descriptions).joinedload(Description.model_ref),
-                         joinedload(Product.model_ref))
-                .filter_by(id=product_id)
+                .options(
+                    joinedload(Product.descriptions).joinedload(Description.model_ref),
+                    subqueryload(Product.evaluations).joinedload(Evaluation.model_ref),
+                    subqueryload(Product.evaluations).joinedload(Evaluation.condition_ref)
+                )
+                .filter(Product.id == product_id)
                 .first()
             )
-            
+
             if not product:
                 return None
 
-            descriptions = [
-                {
-                    "model": desc.model_ref.name,
-                    "text": desc.generated_description,
-                    "model_id": desc.model_ref.id,
-                }
-                for desc in product.descriptions
-            ]
-
-            return {
-                "id": product.id,
-                "name": product.name,
-                "original": product.og_description,
-                "evaluated": product.evaluated,
-                "vote": product.model_ref.name if product.model_ref else None,
-                "descriptions": descriptions
-            }
+            # Convert product to dict with all relationships
+            product_dict = product.to_dict(include_descriptions=True, include_evaluations=True)
+            
+            # For backward compatibility, include the first evaluation's vote if any
+            if product.evaluations:
+                first_eval = product.evaluations[0]
+                product_dict["evaluated"] = first_eval.evaluated
+                product_dict["vote"] = first_eval.vote
+            else:
+                product_dict["evaluated"] = False
+                product_dict["vote"] = None
+            
+            return product_dict
+            
+        except Exception as e:
+            print(f"Error in get_product_by_id: {str(e)}")
+            raise
         finally:
             session.close()
 
     @staticmethod
-    def register_vote(product_id, model_id):
-        """Register a vote for a product"""
+    def register_vote(product_id, model_id, condition_id=1):
+        """
+        Register a vote for a product
+        
+        Args:
+            product_id: ID of the product being voted on
+            model_id: ID of the model being voted for
+            condition_id: ID of the condition/context for this evaluation (defaults to 1)
+        """
         if not Session:
-            # Mock success for development
-            print(f"Mock vote registered: product_id={product_id}, model_id={model_id}")
+            # Simulate success in development
             return True
             
         session = Session()
         try:
-            product = session.query(Product).filter_by(id=product_id).first()
+            # Check if product exists
+            product = session.query(Product).get(product_id)
             if not product:
                 return None
-
-            product.evaluated = True
-            product.vote = model_id
-
+                
+            # Check if model exists
+            model = session.query(Model).get(model_id)
+            if not model:
+                raise ValueError(f"Model with ID {model_id} not found")
+                
+            # Check if condition exists
+            condition = session.query(Condition).get(condition_id)
+            if not condition:
+                # Create a default condition if it doesn't exist
+                condition = Condition(description="Default condition", temperature=0)
+                session.add(condition)
+                session.flush()  # To get the ID
+            
+            # Check if an evaluation already exists for this product and condition
+            evaluation = (
+                session.query(Evaluation)
+                .filter(
+                    Evaluation.product == product_id,  # Using 'product' instead of 'product_id'
+                    Evaluation.condition_id == condition_id
+                )
+                .first()
+            )
+            
+            if evaluation:
+                # Update existing evaluation
+                evaluation.vote = model_id
+                evaluation.evaluated = True
+            else:
+                # Create new evaluation
+                evaluation = Evaluation(
+                    product_id=product_id,
+                    model_id=model_id,
+                    condition_id=condition.id,
+                    vote=model_id,
+                    evaluated=True
+                )
+                session.add(evaluation)
+            
             session.commit()
             return True
+            
         except Exception as e:
             session.rollback()
-            raise e
+            print(f"Error registering vote: {str(e)}")
+            raise
         finally:
             session.close()
