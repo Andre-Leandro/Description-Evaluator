@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import useProducts from "../../hooks/useProduct";
 import useVote from "../../hooks/useVote";
@@ -14,17 +14,47 @@ export default function DescriptionVoting() {
   const { sendVote } = useVote();
   const [filter, setFilter] = useState("all"); // "all" | "evaluated" | "pending"
   const [showSidebar, setShowSidebar] = useState(false); // Sidebar visibility
+  const [selectedCondition, setSelectedCondition] = useState(1); // Default to condition ID 1
 
   const handleVote = async (modelName, modelId) => {
-    await sendVote({
-      id: currentProduct.id,
-      model_id: modelId,
-    });
-    setVotes((prev) => [...prev, { productId: currentProduct.id, model: modelName }]);
-    if (index + 1 < productsByPart.length) {
-      setIndex(index + 1);
-    } else {
-      setFinished(true);
+    if (!currentProduct) return;
+    
+    try {
+      // Enviar el voto al servidor
+      await sendVote({
+        id: currentProduct.id,
+        model_id: modelId,
+        condition_id: selectedCondition
+      });
+      
+      // Actualizar el estado local de votos
+      const newVote = { 
+        productId: currentProduct.id, 
+        model: modelName,
+        conditionId: selectedCondition,
+        timestamp: new Date().toISOString()
+      };
+      
+      setVotes((prev) => [...prev, newVote]);
+      
+      // Actualizar el estado de los productos para reflejar el voto
+      // Esto es necesario para que el filtro "evaluated" funcione correctamente
+      const updatedProducts = products.map(p => {
+        if (p.id === currentProduct.id) {
+          return { ...p, evaluated: true };
+        }
+        return p;
+      });
+      
+      // Actualizar el índice o marcar como terminado
+      if (index + 1 < productsByPart.length) {
+        setIndex(index + 1);
+      } else {
+        setFinished(true);
+      }
+    } catch (error) {
+      console.error("Error submitting vote:", error);
+      // El hook useVote ya maneja el error, pero podemos agregar un toast o alerta aquí si es necesario
     }
   };
 
@@ -49,33 +79,137 @@ export default function DescriptionVoting() {
     setShowSidebar(false);
   };
 
-  // Dividir el dataset según la parte seleccionada
+  // Extract unique conditions from all descriptions
+  const conditions = useMemo(() => {
+    const allConditions = [];
+    const seenConditionIds = new Set();
+    
+    console.log('=== DEBUG: Products data structure ===');
+    console.log('Products array length:', products.length);
+    
+    // If we have products but no conditions, log the first product's structure
+    if (products.length > 0) {
+      console.log('First product structure:', JSON.parse(JSON.stringify(products[0])));
+      
+      // Log all available keys in the first product
+      console.log('Keys in first product:', Object.keys(products[0]));
+      
+      // Check if descriptions exist and log their structure
+      if (products[0].descriptions) {
+        console.log('First product has descriptions array, length:', products[0].descriptions.length);
+        if (products[0].descriptions.length > 0) {
+          console.log('First description structure:', JSON.parse(JSON.stringify(products[0].descriptions[0])));
+          console.log('Keys in first description:', Object.keys(products[0].descriptions[0]));
+        }
+      }
+    }
+    
+    // Collect all unique conditions from all descriptions across all products
+    products.forEach((product, productIndex) => {
+      if (product.descriptions && product.descriptions.length > 0) {
+        product.descriptions.forEach((description, descIndex) => {
+          // Try different possible paths to find the condition
+          let condition = null;
+          
+          // Check possible paths to find the condition
+          if (description.condition) {
+            condition = description.condition;
+          } else if (description.evaluation?.condition) {
+            condition = description.evaluation.condition;
+          } else if (description.model?.condition) {
+            condition = description.model.condition;
+          }
+          
+          if (condition && condition.id && !seenConditionIds.has(condition.id)) {
+            console.log(`Found condition in product ${productIndex} description ${descIndex}:`, condition);
+            seenConditionIds.add(condition.id);
+            allConditions.push({
+              id: condition.id,
+              name: `Condition ${condition.id}`,
+              ...condition
+            });
+          }
+        });
+      }
+    });
+    
+    console.log('All conditions found:', allConditions);
+    
+    // Always ensure we have at least one condition
+    if (allConditions.length === 0) {
+      console.warn('No conditions found in the data. Using default condition.');
+      // Return a default condition if none found
+      return [{ id: 1, name: 'Condition 1' }];
+    }
+    
+    // Sort by ID for consistent ordering
+    return allConditions.sort((a, b) => a.id - b.id);
+  }, [products]);
+
+  // Update selected condition if it doesn't exist in the conditions list
+  useEffect(() => {
+    if (conditions.length > 0 && !conditions.some(c => c.id === selectedCondition)) {
+      setSelectedCondition(conditions[0]?.id || 1);
+    }
+  }, [conditions, selectedCondition]);
+
+  // Filtrar productos por la condición seleccionada y dividir el dataset según la parte seleccionada
   const productsByPart = useMemo(() => {
-  if (!products.length) return [];
-  let filtered = [...products];
-  if (part === 1) {
-    filtered = filtered.slice(0, 375);
-  } else if (part === 2) {
-    filtered = filtered.slice(375, 375 + 700);
-  } else if (part === 3) {
-    filtered = filtered.slice(375 + 700, 375 + 700 + 700);
-  }
-  if (filter === "evaluated") {
-    filtered = filtered.filter((p) => p.evaluated);
-  } else if (filter === "pending") {
-    filtered = filtered.filter((p) => !p.evaluated);
-  }
-  return filtered;
-}, [products, part, filter]);
+    if (!products.length) return [];
+    
+    // Primero filtramos por la condición seleccionada
+    let filtered = products.filter(product => {
+      // Si el producto tiene descripciones, verificamos si alguna coincide con la condición
+      if (product.descriptions && product.descriptions.length > 0) {
+        return product.descriptions.some(desc => {
+          // Buscamos la condición en diferentes ubicaciones posibles
+          const condition = desc.condition || 
+                          (desc.evaluation && desc.evaluation.condition) || 
+                          (desc.model && desc.model.condition);
+          
+          // Si encontramos una condición, verificamos si coincide con la seleccionada
+          return condition && condition.id === selectedCondition;
+        });
+      }
+      return false;
+    });
+
+    // Luego aplicamos el filtro de parte (part 1, 2 o 3)
+    if (part === 1) {
+      filtered = filtered.slice(0, 375);
+    } else if (part === 2) {
+      filtered = filtered.slice(375, 375 + 700);
+    } else if (part === 3) {
+      filtered = filtered.slice(375 + 700, 375 + 700 + 700);
+    }
+
+    // Finalmente aplicamos el filtro de estado (evaluated/pending)
+    if (filter === "evaluated") {
+      filtered = filtered.filter((p) => p.evaluated);
+    } else if (filter === "pending") {
+      filtered = filtered.filter((p) => !p.evaluated);
+    }
+    
+    return filtered;
+  }, [products, part, filter, selectedCondition]);
 
   const currentProduct = productsByPart && productsByPart.length > 0 ? productsByPart[index] : null;
 
   const randomizedOptions = useMemo(() => {
-    if (!currentProduct) return [];
-    return [...currentProduct.descriptions]
-      .map((desc) => ({ ...desc }))
-      .sort(() => Math.random() - 0.5);
-  }, [index, currentProduct]);
+    if (!currentProduct || !currentProduct.descriptions) return [];
+  
+    // Filtrar por condición
+    const filtered = currentProduct.descriptions.filter(desc => {
+      const condition = desc.condition || 
+                        (desc.evaluation && desc.evaluation.condition) || 
+                        (desc.model && desc.model.condition);
+      return condition && condition.id === selectedCondition;
+    });
+  
+    // Aleatorizar
+    return [...filtered].sort(() => Math.random() - 0.5);
+  }, [index, currentProduct, selectedCondition]);
+  
 
   const results = useMemo(() => {
     const summary = {};
@@ -96,6 +230,36 @@ export default function DescriptionVoting() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 relative">
+      {/* Condition Selector - Moved to main content */}
+      <div className="bg-white p-4 rounded-lg shadow-md">
+        <h1 className="text-2xl font-bold mb-4 text-center">Evaluación de Descripciones</h1>
+        
+        {conditions.length > 0 && (
+          <div className="mb-4 text-center">
+            <label htmlFor="condition-select" className="mr-2 font-medium text-gray-700">
+              Condición:
+            </label>
+            <select
+              id="condition-select"
+              value={selectedCondition}
+              onChange={(e) => setSelectedCondition(Number(e.target.value))}
+              className="border rounded px-3 py-1 bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              {conditions.map(condition => (
+                <option key={condition.id} value={condition.id}>
+                  {condition.name}
+                </option>
+              ))}
+            </select>
+            {conditions.find(c => c.id === selectedCondition)?.description && (
+              <p className="text-sm text-gray-600 mt-1">
+                {conditions.find(c => c.id === selectedCondition).description}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* Sidebar Navigation */}
       <div 
         className={`fixed right-0 top-0 h-full w-80 bg-white shadow-lg z-50 overflow-y-auto transform transition-transform duration-300 ${
@@ -245,7 +409,7 @@ export default function DescriptionVoting() {
                   {currentProduct.evaluated ? "✓ Evaluado" : "⏳ Pendiente"}
                 </span>
               </div>
-              <p className="text-gray-600 italic text-sm sm:text-base">{currentProduct.original}</p>
+              <p className="text-gray-600 italic text-sm sm:text-base">{currentProduct.og_description}</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -255,10 +419,10 @@ export default function DescriptionVoting() {
                   onClick={() => handleVote(desc.model, desc.model_id)}
                   className="cursor-pointer border rounded-xl p-4 hover:bg-gray-50 transition text-sm sm:text-base bg-white shadow-sm hover:shadow-md"
                 >
-                  <p className="text-gray-800">{desc.text}</p>
+                  <p className="text-gray-800">{desc.generated_description}</p>
                 </div>
               ))}
-              <div
+              <div 
                 onClick={() => handleVote("Todas bien", 0)}
                 className="cursor-pointer border rounded-xl p-4 hover:bg-gray-50 transition text-sm sm:text-base text-center h-full flex items-center justify-center bg-white shadow-sm hover:shadow-md"
               >
