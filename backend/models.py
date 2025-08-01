@@ -121,5 +121,5 @@ class Evaluation(Base):
             "vote": self.vote,
             "product_id": self.product,  # Using self.product to match the column name
             "condition": self.condition_ref.to_dict() if self.condition_ref else None,
-            "model": self.model_ref.to_dict() if self.model_ref and self.vote else None
+            "model": self.model_ref.to_dict() if self.model_ref and self.vote is not None else None
         }
