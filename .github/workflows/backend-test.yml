@@ -35,5 +35,8 @@ jobs:
           echo "portdb=5432" >> .env
           echo "dbname=dummy" >> .env
 
+      - name: Run backend 
+        run: python main.py
+        
       - name: Run backend tests
         run: pytest test_api.py
