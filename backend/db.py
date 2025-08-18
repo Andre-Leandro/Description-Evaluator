@@ -9,7 +9,7 @@ load_dotenv()
 USER = os.getenv("user")
 PASSWORD = os.getenv("password")
 HOST = os.getenv("host")
-PORT = os.getenv("port")
+PORT = os.getenv("portdb")
 DBNAME = os.getenv("dbname")
 
 # Check if all required environment variables are present
@@ -19,7 +19,7 @@ if not all([USER, PASSWORD, HOST, PORT, DBNAME]):
     engine = None
 else:
     # Construct the SQLAlchemy connection string
-    DATABASE_URL = f"postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}?sslmode=require"
+    DATABASE_URL = f"postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}"
 
     # Create the SQLAlchemy engine
     #engine = create_engine(DATABASE_URL)
