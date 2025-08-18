@@ -29,14 +29,16 @@ jobs:
 
       - name: Crear .env dummy
         run: |
-          echo "user=dummy" > .env
-          echo "password=dummy" >> .env
+          echo "user=postgres" > .env
+          echo "password=admin" >> .env
           echo "host=localhost" >> .env
           echo "portdb=5432" >> .env
-          echo "dbname=dummy" >> .env
+          echo "dbname=evaluador_db" >> .env
 
-      - name: Run backend 
-        run: python main.py
-        
+      - name: Run backend in background
+        run: |
+          python main.py & 
+          sleep 10
+
       - name: Run backend tests
         run: pytest test_api.py
