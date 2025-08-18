@@ -1,0 +1,39 @@
+name: Backend Test (DevOps)
+
+on:
+  push:
+    branches: [ DevOps ]
+  pull_request:
+    branches: [ DevOps ]
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest requests
+
+      - name: Crear .env dummy
+        run: |
+          echo "user=dummy" > .env
+          echo "password=dummy" >> .env
+          echo "host=localhost" >> .env
+          echo "portdb=5432" >> .env
+          echo "dbname=dummy" >> .env
+
+      - name: Run backend tests
+        run: pytest test_api.py
