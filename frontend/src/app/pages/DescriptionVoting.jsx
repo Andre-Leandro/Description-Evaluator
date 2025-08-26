@@ -18,9 +18,6 @@ export default function DescriptionVoting() {
 
   const handleVote = async (modelName, modelId) => {
     if (!currentProduct) return;
-    console.log(modelId)
-    console.log(selectedCondition)
-    console.log(currentProduct.id)
 
     try {
       // Enviar el voto al servidor
@@ -87,16 +84,9 @@ export default function DescriptionVoting() {
     const allConditions = [];
     const seenConditionIds = new Set();
     
-    console.log('=== DEBUG: Products data structure ===');
-    console.log('Products array length:', products.length);
-    
     // If we have products but no conditions, log the first product's structure
     if (products.length > 0) {
-      console.log('First product structure:', JSON.parse(JSON.stringify(products[0])));
-      
-      // Log all available keys in the first product
-      console.log('Keys in first product:', Object.keys(products[0]));
-      
+
       // Check if descriptions exist and log their structure
       if (products[0].descriptions) {
         console.log('First product has descriptions array, length:', products[0].descriptions.length);
@@ -136,15 +126,12 @@ export default function DescriptionVoting() {
       }
     });
     
-    console.log('All conditions found:', allConditions);
-    
     // Always ensure we have at least one condition
     if (allConditions.length === 0) {
       console.warn('No conditions found in the data. Using default condition.');
       // Return a default condition if none found
       return [{ id: 1, name: 'Condition 1' }];
     }
-    
     // Sort by ID for consistent ordering
     return allConditions.sort((a, b) => a.id - b.id);
   }, [products]);
@@ -246,21 +233,59 @@ export default function DescriptionVoting() {
               id="condition-select"
               value={selectedCondition}
               onChange={(e) => setSelectedCondition(Number(e.target.value))}
-              className="border rounded px-3 py-1 bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="border rounded px-3 py-1 bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
             >
               {conditions.map(condition => (
-                <option key={condition.id} value={condition.id}>
-                  {condition.name}
+                condition.id > 1 &&
+                <option key={condition.id} value={condition.id}  >
+                  {condition.description}
                 </option>
               ))}
             </select>
-            {conditions.find(c => c.id === selectedCondition)?.description && (
-              <p className="text-sm text-gray-600 mt-1">
-                {conditions.find(c => c.id === selectedCondition).description}
-              </p>
-            )}
           </div>
         )}
+
+     
+        <div className="flex flex-wrap items-center gap-4 bg-white p-4 rounded-lg">
+          {/* Navigation button */}
+          <button
+            onClick={() => setShowSidebar(true)}
+            className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center gap-2 text-sm"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <span>Navegación</span>
+          </button>
+          
+          {/* Filter dropdown */}
+          <div className="relative">
+            <select
+              value={filter}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setIndex(0);
+              }}
+              className="appearance-none border rounded px-3 py-2 pr-8 text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              <option value="all">Todos</option>
+              <option value="evaluated">Evaluados</option>
+              <option value="pending">Pendientes</option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center">
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Product counter */}
+          <div className="ml-auto">
+            <span className="inline-block bg-[#a9cce3] text-white font-bold px-4 py-2 rounded-xl shadow text-sm">
+              {productsByPart.length > 0 ? index + 1 : 0} / {productsByPart.length}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Sidebar Navigation */}
@@ -306,90 +331,11 @@ export default function DescriptionVoting() {
               );
             })}
           </div>
-          <div className="mt-4 text-sm text-gray-600">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-4 h-4 bg-green-100 rounded"></div>
-              <span>Respondidas: {votes.length}</span>
-            </div>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-4 h-4 bg-yellow-100 rounded"></div>
-              <span>Saltadas: {skipped.length}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-gray-100 rounded"></div>
-              <span>Pendientes: {productsByPart.length - votes.length - skipped.length}</span>
-            </div>
-          </div>
         </div>
       </div>
       
       {/* Header with navigation and filters */}
-      <div className="mb-6">
-        <div className="flex flex-wrap items-center gap-4 bg-white p-4 rounded-lg shadow-sm">
-          {/* Navigation button */}
-          <button
-            onClick={() => setShowSidebar(true)}
-            className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center gap-2 text-sm"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-            <span>Navegación</span>
-          </button>
-          
-          {/* Filter dropdown */}
-          <div className="relative">
-            <select
-              value={filter}
-              onChange={(e) => {
-                setFilter(e.target.value);
-                setIndex(0);
-              }}
-              className="appearance-none border rounded px-3 py-2 pr-8 text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-              <option value="all">Todos</option>
-              <option value="evaluated">Evaluados</option>
-              <option value="pending">Pendientes</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Dataset selector */}
-          <div className="relative">
-            <select
-              value={part}
-              onChange={e => {
-                setPart(Number(e.target.value));
-                setIndex(0);
-                setVotes([]);
-                setSkipped([]);
-                setFinished(false);
-              }}
-              className="appearance-none border rounded px-3 py-2 pr-8 text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-              <option value={1}>Parte 1 (1–375)</option>
-              <option value={2}>Parte 2 (376–1075)</option>
-              <option value={3}>Parte 3 (1076–1775)</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Product counter */}
-          <div className="ml-auto">
-            <span className="inline-block bg-[#a9cce3] text-white font-bold px-4 py-2 rounded-xl shadow text-sm">
-              {productsByPart.length > 0 ? index + 1 : 0} / {productsByPart.length}
-            </span>
-          </div>
-        </div>
-      </div>
+      
       {!productsByPart.length ? (
         <div className="bg-white p-6 rounded-xl shadow-sm border text-center">
           <p className="text-gray-600">No hay productos disponibles para mostrar.</p>
