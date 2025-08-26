@@ -10,6 +10,7 @@ import {
   BarChart2, 
   Upload, 
   Home,
+  Download
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -26,7 +27,7 @@ const navItems = [
     icon: <Upload className="w-5 h-5" />
   },
   { 
-    name: 'Comparación', 
+    name: 'Evaluación', 
     path: '/comparacion',
     icon: <GitCompare className="w-5 h-5" />
   },
@@ -38,7 +39,7 @@ const navItems = [
   { 
     name: 'Descargar CSV', 
     path: '/descargar-csv',
-    icon: <Upload className="w-5 h-5" />
+    icon: <Download className="w-5 h-5" />
   },
 ];
 
@@ -64,7 +65,16 @@ export default function Sidebar() {
     <div className={`h-screen flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
       <div className="p-4 flex items-center justify-between border-b border-gray-200">
         {!isCollapsed ? (
-          <h2 className="text-lg font-bold text-gray-900"> Catalog Enrichment</h2>
+          <div className="flex items-center space-x-2">
+          <img
+            src="/logo.png"
+            alt="Logo"
+            width={75}
+            height={75}
+            className="rounded-full"
+          />
+          <h2 className="text-lg font-bold text-gray-900 leading-tight"> Catalog Enrichment</h2>
+           </div>
         ) : (
           <div className="w-6"></div>
         )}
@@ -109,7 +119,7 @@ export default function Sidebar() {
       </nav>
       {!isCollapsed && (
         <div className="p-4 border-t border-gray-200 text-xs text-gray-500">
-          <p>Description Evaluator v1.0.0</p>
+          <p>Catalog Enrichment v1.0.0</p>
         </div>
       )}
     </div>
