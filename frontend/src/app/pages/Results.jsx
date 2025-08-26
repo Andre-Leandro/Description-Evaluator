@@ -114,33 +114,53 @@ export default function Results() {
   return (
    <div className="max-w-7xl mx-auto space-y-4">
       <div className="bg-white p-4 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-4 text-left">Resultados</h1>
-        
-        {conditions.length > 0 && (
-          <div className="mb-4">
-            <label htmlFor="condition-select" className="block mb-2 font-medium text-gray-700">
-              Condición:
-            </label>
-            <select
-              id="condition-select"
+        <div className="text-center mb-10 mt-4">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+             Resultados de las <span className="text-[#5A8CD3]">Votaciones</span>
+            </h1> 
+        </div>
+            
+        <div className="flex flex-wrap items-center gap-4 bg-white p-4 rounded-lg">
+         {conditions.length > 0 && (
+          <div className="relative">
+             <select
+             id="condition-select"
               value={selectedCondition}
               onChange={(e) => setSelectedCondition(Number(e.target.value))}
-              className="border rounded px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              {conditions.filter(condition => condition.id > 1).map(condition => (
+            className="border rounded px-3 py-2 pr-10 text-sm bg-white text-gray-800 
+                      focus:outline-none focus:ring-2 focus:ring-blue-400 
+                      appearance-none text-center [text-align-last:center] w-auto min-w-[120px]"
+          >
+            {conditions.map(condition => (
+              condition.id > 1 && (
                 <option key={condition.id} value={condition.id}>
                   {condition.description}
                 </option>
-              ))}
-            </select>
+              )
+            ))}
+          </select>
+
+          {/* Flecha custom */}
+           <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
           </div>
         )}
+        <div className="ml-auto">
+            <span className="inline-block bg-[#5A8CD3] text-white font-bold px-4 py-2 rounded-xl text-sm">
+             {evaluated.length} / {filtered.length}
+            </span>
+          </div>
       </div>
-      <div className="flex justify-start mb-8">
-        <span className="inline-block bg-[#a9cce3] text-white font-bold px-4 py-2 rounded-xl">
-          Evaluados: {evaluated.length} / {filtered.length}
-        </span>
       </div>
+      
 
       <div className="text-center">
         <ResponsiveContainer width="100%" height={300}>
@@ -161,6 +181,7 @@ export default function Results() {
           </BarChart>
         </ResponsiveContainer>
       </div>
+      
     </div>
 
   );

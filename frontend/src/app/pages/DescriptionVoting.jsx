@@ -224,34 +224,84 @@ export default function DescriptionVoting() {
   if (error) return <div className="text-center text-red-600 p-4">Error: {error}</div>;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 relative">
+    <div className="max-w-7xl mx-auto space-y-6 relative ">
       {/* Condition Selector */}
-      <div className="bg-white p-4 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-4 text-left">Evaluación de Descripciones</h1>
-        
-        {conditions.length > 0 && (
-          <div className="mb-4">
-            <label htmlFor="condition-select" className="block mb-2 font-medium text-gray-700">
-              Condición:
-            </label>
-            <select
-              id="condition-select"
-              value={selectedCondition}
-              onChange={(e) => setSelectedCondition(Number(e.target.value))}
-              className="border rounded px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              {conditions.map(condition => (
-                condition.id > 1 &&
+      <div className="bg-white p-4 rounded-lg shadow-md ">
+        <div className="text-center mb-10 mt-4">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+             Evaluación de <span className="text-[#5A8CD3]">Descripciones</span>
+            </h1> 
+        </div>
+      
+        <div className="flex flex-wrap items-center gap-4 bg-white p-4 rounded-lg">
+  
+            {conditions.length > 0 && (
+          <div className="relative">
+             <select
+            id="condition-select"
+            value={selectedCondition}
+            onChange={(e) => setSelectedCondition(Number(e.target.value))}
+            className="border rounded px-3 py-2 pr-10 text-sm bg-white text-gray-800 
+                      focus:outline-none focus:ring-2 focus:ring-blue-400 
+                      appearance-none text-center [text-align-last:center] w-auto min-w-[120px]"
+          >
+            {conditions.map(condition => (
+              condition.id > 1 && (
                 <option key={condition.id} value={condition.id}>
                   {condition.description}
                 </option>
-              ))}
-            </select>
+              )
+            ))}
+          </select>
+
+          {/* Flecha custom */}
+           <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+          </div>
+        )}
+          {/* Filter dropdown */}
+          {conditions.length > 0 && (
+          <div className="relative">
+             <select
+            id="condition-select"
+             value={filter}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setIndex(0);
+              }}
+            className="border rounded px-3 py-2 pr-10 text-sm bg-white text-gray-800 
+                      focus:outline-none focus:ring-2 focus:ring-blue-400 
+                      appearance-none text-center [text-align-last:center] w-auto min-w-[120px]"
+          >
+             <option value="all">Todos</option>
+              <option value="evaluated">Evaluados</option>
+              <option value="pending">Pendientes</option>
+          </select>
+
+          {/* Flecha custom */}
+           <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
           </div>
         )}
 
-     
-        <div className="flex flex-wrap items-center gap-4 bg-white p-4 rounded-lg">
+          
+
           {/* Navigation button */}
           <button
             onClick={() => setShowSidebar(true)}
@@ -262,31 +312,10 @@ export default function DescriptionVoting() {
             </svg>
             <span>Navegación</span>
           </button>
-          
-          {/* Filter dropdown */}
-          <div className="relative">
-            <select
-              value={filter}
-              onChange={(e) => {
-                setFilter(e.target.value);
-                setIndex(0);
-              }}
-              className="border rounded px-3 py-2 pr-8 text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-              <option value="all">Todos</option>
-              <option value="evaluated">Evaluados</option>
-              <option value="pending">Pendientes</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
 
           {/* Product counter */}
           <div className="ml-auto">
-            <span className="inline-block bg-[#a9cce3] text-white font-bold px-4 py-2 rounded-xl text-sm">
+            <span className="inline-block bg-[#5A8CD3] text-white font-bold px-4 py-2 rounded-xl text-sm">
               {productsByPart.length > 0 ? index + 1 : 0} / {productsByPart.length}
             </span>
           </div>
@@ -363,7 +392,7 @@ export default function DescriptionVoting() {
                   {currentProduct.evaluated ? "✓ Evaluado" : "⏳ Pendiente"}
                 </span>
               </div>
-              <p className="text-gray-600 italic text-sm sm:text-base text-left">{currentProduct.og_description}</p>
+              <p className="text-gray-600 italic text-sm sm:text-base text-left"> Imagen</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -385,18 +414,13 @@ export default function DescriptionVoting() {
             </div>
           </div>
           
-          <div className="flex justify-between gap-4 mt-6">
+          <div className="flex justify-end gap-4 mt-6 mb-6">
+          
             <button
               onClick={handleSkip}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition font-semibold"
+              className="px-4 py-2 bg-[#5A8CD3] text-white rounded-xl hover:bg-[#4A90E2] transition font-semibold"
             >
-              Saltar pregunta
-            </button>
-            <button
-              onClick={() => setFinished(true)}
-              className="px-4 py-2 bg-[#a9cce3] text-white rounded-xl hover:bg-[#5499c7] transition font-semibold"
-            >
-              Terminar evaluación
+               Saltar pregunta
             </button>
           </div>
         </>

@@ -7,8 +7,8 @@ export default function Home() {
         <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12">
           {/* Hero Section */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-              Evaluador de <span className="text-blue-600">Descripciones</span>
+            <h1 className="text-3xl md:text-5xl font-bold text-gray-800 mb-4">
+              Catalog <span className="text-[#5A8CD3]">Enrichment</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               Herramienta profesional para evaluar, comparar y optimizar descripciones de productos. 
@@ -83,7 +83,12 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <Link 
               href="/subir-csv" 
-              className="group bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium py-6 px-8 rounded-xl transition-all duration-200 flex items-center justify-between transform hover:scale-105"
+              className="group bg-gradient-to-r from-[#5A8CD3] to-[#5A8CD3] 
+           hover:from-[#5A8CD3] hover:to-[#4A90E2] 
+           text-white font-medium py-6 px-8 rounded-xl 
+           transition-all duration-200 flex items-center justify-between 
+           transform hover:scale-105 hover:shadow-lg"
+
             >
               <div className="text-left">
                 <span className="text-lg font-semibold">Comenzar</span>
@@ -112,7 +117,7 @@ export default function Home() {
           <div className="bg-gray-50 rounded-xl p-6 text-center">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <div className="text-2xl font-bold text-blue-600 mb-1">100%</div>
+                <div className="text-2xl font-bold text-[#5A8CD3] mb-1">100%</div>
                 <div className="text-sm text-gray-600">Preciso</div>
               </div>
               <div>
