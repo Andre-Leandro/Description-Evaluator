@@ -215,29 +215,34 @@ export default function DescriptionVoting() {
     return Object.entries(summary).map(([model, count]) => ({ model, count }));
   }, [votes, skipped]);
 
-  if (loading) return <div>Cargando productos...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center min-h-64 space-y-4">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <p className="text-gray-600">Cargando productos...</p>
+    </div>
+  );
+  if (error) return <div className="text-center text-red-600 p-4">Error: {error}</div>;
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 relative">
-      {/* Condition Selector - Moved to main content */}
+      {/* Condition Selector */}
       <div className="bg-white p-4 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-4 text-center">Evaluación de Descripciones</h1>
+        <h1 className="text-2xl font-bold mb-4 text-left">Evaluación de Descripciones</h1>
         
         {conditions.length > 0 && (
-          <div className="mb-4 text-center">
-            <label htmlFor="condition-select" className="mr-2 font-medium text-gray-700">
+          <div className="mb-4">
+            <label htmlFor="condition-select" className="block mb-2 font-medium text-gray-700">
               Condición:
             </label>
             <select
               id="condition-select"
               value={selectedCondition}
               onChange={(e) => setSelectedCondition(Number(e.target.value))}
-              className="border rounded px-3 py-1 bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
+              className="border rounded px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               {conditions.map(condition => (
                 condition.id > 1 &&
-                <option key={condition.id} value={condition.id}  >
+                <option key={condition.id} value={condition.id}>
                   {condition.description}
                 </option>
               ))}
@@ -266,7 +271,7 @@ export default function DescriptionVoting() {
                 setFilter(e.target.value);
                 setIndex(0);
               }}
-              className="appearance-none border rounded px-3 py-2 pr-8 text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="border rounded px-3 py-2 pr-8 text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               <option value="all">Todos</option>
               <option value="evaluated">Evaluados</option>
@@ -281,7 +286,7 @@ export default function DescriptionVoting() {
 
           {/* Product counter */}
           <div className="ml-auto">
-            <span className="inline-block bg-[#a9cce3] text-white font-bold px-4 py-2 rounded-xl shadow text-sm">
+            <span className="inline-block bg-[#a9cce3] text-white font-bold px-4 py-2 rounded-xl text-sm">
               {productsByPart.length > 0 ? index + 1 : 0} / {productsByPart.length}
             </span>
           </div>
@@ -345,11 +350,11 @@ export default function DescriptionVoting() {
           <div className="space-y-6">
             <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border space-y-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
-                <h2 className="text-lg sm:text-xl font-medium text-gray-800 break-words max-w-[80%]">
+                <h2 className="text-lg sm:text-xl font-medium text-gray-800 break-words max-w-[80%] text-left">
                   {currentProduct.name}
                 </h2>
                 <span
-                  className={`text-xs sm:text-sm font-semibold px-3 py-1 rounded-full shadow-sm ${
+                  className={`text-xs sm:text-sm font-semibold px-3 py-1 rounded-full ${
                     currentProduct.evaluated
                       ? "bg-green-50 text-green-700 border border-green-100"
                       : "bg-yellow-50 text-yellow-700 border border-yellow-100"
@@ -358,7 +363,7 @@ export default function DescriptionVoting() {
                   {currentProduct.evaluated ? "✓ Evaluado" : "⏳ Pendiente"}
                 </span>
               </div>
-              <p className="text-gray-600 italic text-sm sm:text-base">{currentProduct.og_description}</p>
+              <p className="text-gray-600 italic text-sm sm:text-base text-left">{currentProduct.og_description}</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -366,14 +371,14 @@ export default function DescriptionVoting() {
                 <div
                   key={i}
                   onClick={() => handleVote(desc.model, desc.model.id)}
-                  className="cursor-pointer border rounded-xl p-4 hover:bg-gray-50 transition text-sm sm:text-base bg-white shadow-sm hover:shadow-md"
+                  className="cursor-pointer border rounded-xl p-4 hover:bg-gray-50 transition text-sm sm:text-base bg-white"
                 >
                   <p className="text-gray-800">{desc.generated_description}</p>
                 </div>
               ))}
               <div 
                 onClick={() => handleVote("Todas bien", 0)}
-                className="cursor-pointer border rounded-xl p-4 hover:bg-gray-50 transition text-sm sm:text-base text-center h-full flex items-center justify-center bg-white shadow-sm hover:shadow-md"
+                className="cursor-pointer border rounded-xl p-4 hover:bg-gray-50 transition text-sm sm:text-base text-center h-full flex items-center justify-center bg-white"
               >
                 <span className="text-gray-700">Todas están bien</span>
               </div>
@@ -383,13 +388,13 @@ export default function DescriptionVoting() {
           <div className="flex justify-between gap-4 mt-6">
             <button
               onClick={handleSkip}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl shadow hover:bg-gray-300 transition font-semibold"
+              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition font-semibold"
             >
               Saltar pregunta
             </button>
             <button
               onClick={() => setFinished(true)}
-              className="px-4 py-2 bg-[#a9cce3] text-white rounded-xl shadow hover:bg-[#5499c7] transition font-semibold"
+              className="px-4 py-2 bg-[#a9cce3] text-white rounded-xl hover:bg-[#5499c7] transition font-semibold"
             >
               Terminar evaluación
             </button>
@@ -427,7 +432,7 @@ export default function DescriptionVoting() {
                 setSkipped([]);
                 setFinished(false);
               }}
-              className="px-4 py-2 bg-[#a9cce3] text-white rounded-xl shadow hover:bg-[#5499c7] transition font-semibold"
+              className="px-4 py-2 bg-[#a9cce3] text-white rounded-xl hover:bg-[#5499c7] transition font-semibold"
             >
               Reiniciar evaluación
             </button>

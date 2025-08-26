@@ -6,7 +6,7 @@ import React, { useMemo, useState, useEffect } from "react";
 
 export default function Results() {
   const { products, loading, error } = useProducts();
-  const [selectedCondition, setSelectedCondition] = useState(1); // Default to condition ID 1
+  const [selectedCondition, setSelectedCondition] = useState(2); // Default to condition ID 2 (skip condition 1)
 
     const conditions = useMemo(() => {
       const allConditions = [];
@@ -54,8 +54,9 @@ export default function Results() {
   
     // Update selected condition if it doesn't exist in the conditions list
     useEffect(() => {
-      if (conditions.length > 0 && !conditions.some(c => c.id === selectedCondition)) {
-        setSelectedCondition(conditions[0]?.id || 1);
+      const validConditions = conditions.filter(c => c.id > 1);
+      if (validConditions.length > 0 && !validConditions.some(c => c.id === selectedCondition)) {
+        setSelectedCondition(validConditions[0]?.id || 2);
       }
     }, [conditions, selectedCondition]);
 
@@ -101,42 +102,42 @@ export default function Results() {
     count,
   }));
 
-  if (loading) return <div>Cargando productos...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center min-h-64 space-y-4">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <p className="text-gray-600">Cargando productos...</p>
+    </div>
+  );
+  if (error) return <div className="text-center text-red-600 p-4">Error: {error}</div>;
 
 
   return (
-   <div className="max-w-7xl mx-auto space-y-4 ">
+   <div className="max-w-7xl mx-auto space-y-4">
       <div className="bg-white p-4 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-4 text-center">Resultados</h1>
+        <h1 className="text-2xl font-bold mb-4 text-left">Resultados</h1>
         
         {conditions.length > 0 && (
-          <div className="mb-4 text-center">
-            <label htmlFor="condition-select" className="mr-2 font-medium text-gray-700">
+          <div className="mb-4">
+            <label htmlFor="condition-select" className="block mb-2 font-medium text-gray-700">
               Condición:
             </label>
             <select
               id="condition-select"
               value={selectedCondition}
               onChange={(e) => setSelectedCondition(Number(e.target.value))}
-              className="border rounded px-3 py-1 bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="border rounded px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              {conditions.map(condition => (
+              {conditions.filter(condition => condition.id > 1).map(condition => (
                 <option key={condition.id} value={condition.id}>
-                  {condition.name}
+                  {condition.description}
                 </option>
               ))}
             </select>
-            {conditions.find(c => c.id === selectedCondition)?.description && (
-              <p className="text-sm text-gray-600 mt-1">
-                {conditions.find(c => c.id === selectedCondition).description}
-              </p>
-            )}
           </div>
         )}
       </div>
-      <div className="flex justify-end mb-8">
-        <span className="inline-block bg-[#a9cce3] text-white font-bold px-4 py-2 rounded-xl shadow">
+      <div className="flex justify-start mb-8">
+        <span className="inline-block bg-[#a9cce3] text-white font-bold px-4 py-2 rounded-xl">
           Evaluados: {evaluated.length} / {filtered.length}
         </span>
       </div>

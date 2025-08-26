@@ -10,6 +10,7 @@ import {
   BarChart2, 
   Upload, 
   Home,
+  Download
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -38,7 +39,7 @@ const navItems = [
   { 
     name: 'Descargar CSV', 
     path: '/descargar-csv',
-    icon: <Upload className="w-5 h-5" />
+    icon: <Download className="w-5 h-5" />
   },
 ];
 
