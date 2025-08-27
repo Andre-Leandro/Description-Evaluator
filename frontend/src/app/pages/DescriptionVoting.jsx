@@ -224,16 +224,17 @@ export default function DescriptionVoting() {
   if (error) return <div className="text-center text-red-600 p-4">Error: {error}</div>;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 relative ">
-      {/* Condition Selector */}
-      <div className="bg-white p-4 rounded-lg shadow-md ">
-        <div className="text-center mb-10 mt-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="bg-white rounded-2xl shadow-lg p-8 space-y-6 relative">
+          {/* Condition Selector */}
+          <div className="text-center mb-10 mt-4">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
              Evaluación de <span className="text-[#5A8CD3]">Descripciones</span>
             </h1> 
         </div>
-      
-        <div className="flex flex-wrap items-center gap-4 bg-white p-4 rounded-lg">
+        
+        <div className="flex flex-wrap items-center gap-4 p-4 rounded-lg">
   
             {conditions.length > 0 && (
           <div className="relative">
@@ -392,7 +393,16 @@ export default function DescriptionVoting() {
                   {currentProduct.evaluated ? "✓ Evaluado" : "⏳ Pendiente"}
                 </span>
               </div>
-              <p className="text-gray-600 italic text-sm sm:text-base text-left"> Imagen</p>
+              <div className="flex items-center gap-4">
+                <div className="flex-shrink-0">
+                  <img 
+                    src="/logo.png" 
+                    alt="Imagen del producto" 
+                    className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                  />
+                </div>
+                <p className="text-gray-600 italic text-sm sm:text-base text-left">Imagen del producto</p>
+              </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -463,6 +473,7 @@ export default function DescriptionVoting() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
