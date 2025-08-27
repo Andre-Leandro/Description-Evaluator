@@ -8,7 +8,7 @@ export default function Home() {
           {/* Hero Section */}
           <div className="text-center mb-12">
             <h1 className="text-3xl md:text-5xl font-bold text-gray-800 mb-4">
-              Catalog <span className="text-[#5A8CD3]">Enrichment</span>
+              Smart<span className="text-[#5A8CD3]">Catalog</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               Herramienta profesional para evaluar, comparar y optimizar descripciones de productos. 

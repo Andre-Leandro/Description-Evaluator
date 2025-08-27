@@ -62,10 +62,10 @@ export default function Sidebar() {
   }, []);
 
   return (
-    <div className={`h-screen flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
+    <div className={`h-screen flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-68'}`}>
       <div className="p-4 flex items-center justify-between border-b border-gray-200">
         {!isCollapsed ? (
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1">
           <img
             src="/logo.png"
             alt="Logo"
@@ -73,7 +73,7 @@ export default function Sidebar() {
             height={75}
             className="rounded-full"
           />
-          <h2 className="text-lg font-bold text-gray-900 leading-tight"> Catalog Enrichment</h2>
+          <h2 className="text-lg font-bold text-gray-900 leading-tight"> SmartCatalog</h2>
            </div>
         ) : (
           <div className="w-6"></div>
@@ -118,8 +118,8 @@ export default function Sidebar() {
         </ul>
       </nav>
       {!isCollapsed && (
-        <div className="p-4 border-t border-gray-200 text-xs text-gray-500">
-          <p>Catalog Enrichment v1.0.0</p>
+        <div className="p-4 border-t border-gray-200 text-xs text-gray-500 ">
+          <p>SmartCatalog v1.0.0</p>
         </div>
       )}
     </div>

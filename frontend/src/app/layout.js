@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Catalog enrichment",
+  title: "SmartCatalog",
   description: "Genera, compara y evaluá descripciones generadas por modelos de IA.",
   icons: {
     icon: "/favicon.ico",
