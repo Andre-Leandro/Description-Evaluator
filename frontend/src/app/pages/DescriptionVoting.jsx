@@ -3,6 +3,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import useProducts from "../../hooks/useProduct";
 import useVote from "../../hooks/useVote";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 export default function DescriptionVoting() {
   const { products, loading, error } = useProducts();
@@ -15,6 +16,8 @@ export default function DescriptionVoting() {
   const [filter, setFilter] = useState("all"); // "all" | "evaluated" | "pending"
   const [showSidebar, setShowSidebar] = useState(false); // Sidebar visibility
   const [selectedCondition, setSelectedCondition] = useState(1); // Default to condition ID 1
+  const [open, setOpen] = useState(false);
+
 
   const handleVote = async (modelName, modelId) => {
     if (!currentProduct) return;
@@ -226,7 +229,7 @@ export default function DescriptionVoting() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="max-w-6xl mx-auto p-6">
-        <div className="bg-white rounded-2xl mb-5 shadow-lg p-4 space-y-6 relative">
+        <div className="bg-white rounded-2xl mb-4 shadow-lg p-4 space-y-6 relative">
         <div className="text-center mt-4">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Evaluación </h2>
         <p className="text-gray-600">Elija la opción que mejor se ajusta a sus necesidades</p>
@@ -375,34 +378,49 @@ export default function DescriptionVoting() {
         </div>
       ) : !finished ? (
         <>
-          <div className="space-y-6">
-            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border space-y-4">
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <h2 className="text-lg sm:text-xl font-medium text-gray-800 break-words max-w-[80%] text-left">
-                  {currentProduct.name}
-                </h2>
-                <span
-                  className={`text-xs sm:text-sm font-semibold px-3 py-1 rounded-full ${
-                    currentProduct.evaluated
-                      ? "bg-green-50 text-green-700 border border-green-100"
-                      : "bg-yellow-50 text-yellow-700 border border-yellow-100"
-                  }`}
-                >
-                  {currentProduct.evaluated ? "✓ Evaluado" : "⏳ Pendiente"}
-                </span>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex-shrink-0">
-                  <img 
-                    src="/logo.png" 
-                    width={164}
-                    height={164} 
-                    alt="Imagen del producto" 
-                    className="w-80 h-70 object-cover rounded-lg border border-gray-200"
-                  />
-                </div>
-              </div>
-            </div>
+          <div className="space-y-4">
+          <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border">
+            
+      {/* Fila principal */}
+      <div className="flex justify-between items-center">
+        {/* Nombre con flechita */}
+        <button
+          onClick={() => setOpen(!open)}
+          className="flex items-center space-x-2 text-lg sm:text-xl font-medium text-gray-800 cursor-pointer focus:outline-none"
+        >
+          <span>{currentProduct.name}</span>
+          {open ? (
+            <ChevronUp className="w-5 h-5 text-gray-500" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-gray-500" />
+          )}
+        </button>
+
+        {/* Estado evaluado/pendiente */}
+        <span
+          className={`text-xs sm:text-sm font-semibold px-3 py-1 rounded-full ${
+            currentProduct.evaluated
+              ? "bg-green-50 text-green-700 border border-green-100"
+              : "bg-yellow-50 text-yellow-700 border border-yellow-100"
+          }`}
+        >
+          {currentProduct.evaluated ? "✓ Evaluado" : "⏳ Pendiente"}
+        </span>
+      </div>
+
+      {/* Imagen desplegable */}
+      {open && (
+        <div className="flex justify-center mt-4">
+          <div className="bg-white p-4 rounded-lg  ">
+            <img
+              src="/logo.png"
+              alt="Imagen del producto"
+              className="w-auto h-[20rem] object-cover rounded-lg"
+            />
+          </div>
+        </div>
+      )}
+    </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {randomizedOptions.map((desc, i) => (
