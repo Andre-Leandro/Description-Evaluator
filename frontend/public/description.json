@@ -1,0 +1,114 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Pista de autos TurboX",
+      "original": "Una pista con loopings y dos autos incluidos.",
+      "descriptions": [
+        { "model": "claude", "text": "Viví la emoción de las carreras con la Pista TurboX y sus loopings extremos." },
+        { "model": "amazon nova premier", "text": "TurboX te lleva a otra dimensión de velocidad con dos autos incluidos." },
+        { "model": "amazon nova micro", "text": "Disfrutá cada looping con esta increíble pista TurboX y sus autos veloces." }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Muñeca Luna Mágica",
+      "original": "Muñeca con luces y sonido para mayores de 3 años.",
+      "descriptions": [
+        { "model": "claude", "text": "Luna Mágica ilumina los sueños de los más pequeños con luces y melodías." },
+        { "model": "amazon nova premier", "text": "Una muñeca que canta y brilla como la luna, ideal para niños." },
+        { "model": "amazon nova micro", "text": "Luz, sonido y ternura en cada abrazo con Luna Mágica, para mayores de 3 años." }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Robot Interactivo MaxBot",
+      "original": "Robot programable con sensores y control remoto.",
+      "descriptions": [
+        { "model": "claude", "text": "MaxBot responde a tus órdenes y aprende nuevos movimientos." },
+        { "model": "amazon nova premier", "text": "Descubrí la robótica con MaxBot, el robot programable con sensores inteligentes." },
+        { "model": "amazon nova micro", "text": "Controlá a MaxBot a distancia y programá sus acciones fácilmente." }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Set de Arte Creativo",
+      "original": "Incluye acuarelas, pinceles y hojas para pintar.",
+      "descriptions": [
+        { "model": "claude", "text": "Dejá volar tu imaginación con este completo set de arte." },
+        { "model": "amazon nova premier", "text": "Todo lo que necesitás para pintar y crear en un solo set." },
+        { "model": "amazon nova micro", "text": "Acuarelas, pinceles y hojas para que los chicos se expresen artísticamente." }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Juego de Construcción MegaBlocks",
+      "original": "Bloques grandes y coloridos para armar estructuras.",
+      "descriptions": [
+        { "model": "claude", "text": "Construí castillos y torres con los MegaBlocks gigantes y resistentes." },
+        { "model": "amazon nova premier", "text": "MegaBlocks: diversión asegurada con bloques fáciles de encastrar." },
+        { "model": "amazon nova micro", "text": "Desarrollá la creatividad armando estructuras con MegaBlocks coloridos." }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Puzzle Animales del Mundo",
+      "original": "Rompecabezas de 100 piezas con ilustraciones de animales.",
+      "descriptions": [
+        { "model": "claude", "text": "Armá el mundo animal pieza por pieza con este divertido puzzle." },
+        { "model": "amazon nova premier", "text": "Descubrí animales de todos los continentes en este rompecabezas educativo." },
+        { "model": "amazon nova micro", "text": "Puzzle de 100 piezas con ilustraciones coloridas de animales para aprender jugando." }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Camión Volcador Gigante",
+      "original": "Camión de plástico resistente para jugar al aire libre.",
+      "descriptions": [
+        { "model": "claude", "text": "Transportá arena y juguetes con el camión volcador más grande." },
+        { "model": "amazon nova premier", "text": "Camión volcador de gran tamaño, ideal para juegos en la plaza o jardín." },
+        { "model": "amazon nova micro", "text": "Diversión asegurada al aire libre con este camión volcador resistente." }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Set de Té Infantil",
+      "original": "Vajilla de juguete para juegos de rol.",
+      "descriptions": [
+        { "model": "claude", "text": "Invitá a tus amigos a una merienda con este set de té infantil." },
+        { "model": "amazon nova premier", "text": "Set de té de juguete para compartir momentos imaginarios." },
+        { "model": "amazon nova micro", "text": "Vajilla colorida para que los chicos jueguen a la hora del té." }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Pelota Saltarina XL",
+      "original": "Pelota grande y resistente para saltar y jugar.",
+      "descriptions": [
+        { "model": "claude", "text": "Saltá y divertite con la pelota saltarina XL, ideal para exteriores." },
+        { "model": "amazon nova premier", "text": "Pelota saltarina de gran tamaño para juegos activos y seguros." },
+        { "model": "amazon nova micro", "text": "Diversión sin límites saltando con la pelota XL, resistente y colorida." }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Microscopio Junior",
+      "original": "Microscopio de juguete con accesorios para explorar.",
+      "descriptions": [
+        { "model": "claude", "text": "Descubrí el mundo microscópico con este microscopio para chicos." },
+        { "model": "amazon nova premier", "text": "Explorá y aprendé con el microscopio junior y sus accesorios." },
+        { "model": "amazon nova micro", "text": "Observá pequeños detalles y experimentá con el microscopio de juguete." }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Set de Herramientas Mini",
+      "original": "Herramientas de juguete para juegos de construcción.",
+      "descriptions": [
+        { "model": "claude", "text": "Convertite en un pequeño constructor con este set de herramientas mini." },
+        { "model": "amazon nova premier", "text": "Herramientas de juguete seguras para aprender jugando a construir." },
+        { "model": "amazon nova micro", "text": "Set completo de herramientas mini para juegos de rol y creatividad." }
+      ]
+    }
+  ]
+}
