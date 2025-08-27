@@ -113,15 +113,14 @@ export default function Results() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="bg-white rounded-2xl shadow-lg p-8 space-y-6">
-          <div className="text-center mb-10 mt-4">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-             Resultados de las <span className="text-[#5A8CD3]">Votaciones</span>
-            </h1> 
-        </div>
+      <div className="max-w-6xl mx-auto p-6">
+        <div className="bg-white rounded-2xl mb-8 shadow-lg p-4 space-y-6 ">
+     <div className="text-center mt-4">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Resultados</h2>
+        <p className="text-gray-600">Se observan los resultados de las votaciones que ha realizado</p>
+      </div>
             
-        <div className="flex flex-wrap items-center gap-4 bg-white p-4 rounded-lg">
+        <div className="flex flex-wrap items-center gap-4 bg-white p-2 rounded-lg">
          {conditions.length > 0 && (
           <div className="relative">
              <select
@@ -158,12 +157,9 @@ export default function Results() {
             <span className="inline-block bg-[#5A8CD3] text-white font-bold px-4 py-2 rounded-xl text-sm">
              {evaluated.length} / {filtered.length}
             </span>
-          </div>
+          </div>          
       </div>
-      </div>
-      
-
-      <div className="text-center">
+      <div className="text-center py-4">
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data}>
             <XAxis dataKey="model" />
@@ -182,6 +178,8 @@ export default function Results() {
           </BarChart>
         </ResponsiveContainer>
         </div>
+      </div>
+      
       </div>
     </div>
 

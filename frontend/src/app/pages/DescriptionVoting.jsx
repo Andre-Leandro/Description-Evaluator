@@ -225,16 +225,14 @@ export default function DescriptionVoting() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="bg-white rounded-2xl shadow-lg p-8 space-y-6 relative">
-          {/* Condition Selector */}
-          <div className="text-center mb-10 mt-4">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-             Evaluación de <span className="text-[#5A8CD3]">Descripciones</span>
-            </h1> 
-        </div>
+      <div className="max-w-6xl mx-auto p-6">
+        <div className="bg-white rounded-2xl mb-5 shadow-lg p-4 space-y-6 relative">
+        <div className="text-center mt-4">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Evaluación </h2>
+        <p className="text-gray-600">Elija la opción que mejor se ajusta a sus necesidades</p>
+      </div>
         
-        <div className="flex flex-wrap items-center gap-4 p-4 rounded-lg">
+        <div className="flex flex-wrap items-center gap-4 p-2 rounded-lg">
   
             {conditions.length > 0 && (
           <div className="relative">
