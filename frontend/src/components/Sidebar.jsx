@@ -10,7 +10,7 @@ import {
   BarChart2, 
   Upload, 
   Home,
-  ChevronLeft
+  Download
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -22,14 +22,14 @@ const navItems = [
     icon: <Home className="w-5 h-5" />
   },
   { 
-    name: 'Comparación', 
-    path: '/comparacion',
-    icon: <GitCompare className="w-5 h-5" />
+    name: 'Cargar Datos', 
+    path: '/subir-csv',
+    icon: <Upload className="w-5 h-5" />
   },
   { 
-    name: 'Calificación', 
-    path: '/calificacion',
-    icon: <Star className="w-5 h-5" />
+    name: 'Evaluación', 
+    path: '/comparacion',
+    icon: <GitCompare className="w-5 h-5" />
   },
   { 
     name: 'Resultados', 
@@ -37,9 +37,9 @@ const navItems = [
     icon: <BarChart2 className="w-5 h-5" />
   },
   { 
-    name: 'Subir CSV', 
-    path: '/subir-csv',
-    icon: <Upload className="w-5 h-5" />
+    name: 'Descargar CSV', 
+    path: '/descargar-csv',
+    icon: <Download className="w-5 h-5" />
   },
 ];
 
@@ -65,7 +65,16 @@ export default function Sidebar() {
     <div className={`h-screen flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
       <div className="p-4 flex items-center justify-between border-b border-gray-200">
         {!isCollapsed ? (
-          <h2 className="text-lg font-semibold text-gray-700">Menú</h2>
+          <div className="flex items-center space-x-2">
+          <img
+            src="/logo.png"
+            alt="Logo"
+            width={75}
+            height={75}
+            className="rounded-full"
+          />
+          <h2 className="text-lg font-bold text-gray-900 leading-tight"> Catalog Enrichment</h2>
+           </div>
         ) : (
           <div className="w-6"></div>
         )}
@@ -89,7 +98,7 @@ export default function Sidebar() {
                   href={item.path}
                   className={`flex items-center p-3 rounded-md transition-colors ${
                     isActive
-                      ? 'bg-[#a9cce3] text-white'
+                      ? 'bg-[#5A8CD3] text-white'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
@@ -101,9 +110,7 @@ export default function Sidebar() {
                   <span className={`ml-3 transition-opacity duration-200 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100'}`}>
                     {item.name}
                   </span>
-                  {!isCollapsed && (
-                    <ChevronRight className={`w-4 h-4 ml-auto transition-transform ${isActive ? 'text-white' : 'text-gray-400'}`} />
-                  )}
+                  
                 </Link>
               </li>
             );
@@ -112,7 +119,7 @@ export default function Sidebar() {
       </nav>
       {!isCollapsed && (
         <div className="p-4 border-t border-gray-200 text-xs text-gray-500">
-          <p>Description Evaluator v1.0.0</p>
+          <p>Catalog Enrichment v1.0.0</p>
         </div>
       )}
     </div>

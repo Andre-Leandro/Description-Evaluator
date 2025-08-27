@@ -3,6 +3,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import useProducts from "../../hooks/useProduct";
 import useVote from "../../hooks/useVote";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 export default function DescriptionVoting() {
   const { products, loading, error } = useProducts();
@@ -15,12 +16,11 @@ export default function DescriptionVoting() {
   const [filter, setFilter] = useState("all"); // "all" | "evaluated" | "pending"
   const [showSidebar, setShowSidebar] = useState(false); // Sidebar visibility
   const [selectedCondition, setSelectedCondition] = useState(1); // Default to condition ID 1
+  const [open, setOpen] = useState(false);
+
 
   const handleVote = async (modelName, modelId) => {
     if (!currentProduct) return;
-    console.log(modelId)
-    console.log(selectedCondition)
-    console.log(currentProduct.id)
 
     try {
       // Enviar el voto al servidor
@@ -87,16 +87,9 @@ export default function DescriptionVoting() {
     const allConditions = [];
     const seenConditionIds = new Set();
     
-    console.log('=== DEBUG: Products data structure ===');
-    console.log('Products array length:', products.length);
-    
     // If we have products but no conditions, log the first product's structure
     if (products.length > 0) {
-      console.log('First product structure:', JSON.parse(JSON.stringify(products[0])));
-      
-      // Log all available keys in the first product
-      console.log('Keys in first product:', Object.keys(products[0]));
-      
+
       // Check if descriptions exist and log their structure
       if (products[0].descriptions) {
         console.log('First product has descriptions array, length:', products[0].descriptions.length);
@@ -136,15 +129,12 @@ export default function DescriptionVoting() {
       }
     });
     
-    console.log('All conditions found:', allConditions);
-    
     // Always ensure we have at least one condition
     if (allConditions.length === 0) {
       console.warn('No conditions found in the data. Using default condition.');
       // Return a default condition if none found
       return [{ id: 1, name: 'Condition 1' }];
     }
-    
     // Sort by ID for consistent ordering
     return allConditions.sort((a, b) => a.id - b.id);
   }, [products]);
@@ -228,39 +218,110 @@ export default function DescriptionVoting() {
     return Object.entries(summary).map(([model, count]) => ({ model, count }));
   }, [votes, skipped]);
 
-  if (loading) return <div>Cargando productos...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center min-h-64 space-y-4">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <p className="text-gray-600">Cargando productos...</p>
+    </div>
+  );
+  if (error) return <div className="text-center text-red-600 p-4">Error: {error}</div>;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 relative">
-      {/* Condition Selector - Moved to main content */}
-      <div className="bg-white p-4 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-4 text-center">Evaluación de Descripciones</h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="max-w-6xl mx-auto p-6">
+        <div className="bg-white rounded-2xl mb-4 shadow-lg p-4 space-y-6 relative">
+        <div className="text-center mt-4">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Evaluación </h2>
+        <p className="text-gray-600">Elija la opción que mejor se ajusta a sus necesidades</p>
+      </div>
         
-        {conditions.length > 0 && (
-          <div className="mb-4 text-center">
-            <label htmlFor="condition-select" className="mr-2 font-medium text-gray-700">
-              Condición:
-            </label>
-            <select
-              id="condition-select"
-              value={selectedCondition}
-              onChange={(e) => setSelectedCondition(Number(e.target.value))}
-              className="border rounded px-3 py-1 bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              {conditions.map(condition => (
+        <div className="flex flex-wrap items-center gap-4 p-2 rounded-lg">
+  
+            {conditions.length > 0 && (
+          <div className="relative">
+             <select
+            id="condition-select"
+            value={selectedCondition}
+            onChange={(e) => setSelectedCondition(Number(e.target.value))}
+            className="border rounded px-3 py-2 pr-10 text-sm bg-white text-gray-800 
+                      focus:outline-none focus:ring-2 focus:ring-blue-400 
+                      appearance-none text-center [text-align-last:center] w-auto min-w-[120px]"
+          >
+            {conditions.map(condition => (
+              condition.id > 1 && (
                 <option key={condition.id} value={condition.id}>
-                  {condition.name}
+                  {condition.description}
                 </option>
-              ))}
-            </select>
-            {conditions.find(c => c.id === selectedCondition)?.description && (
-              <p className="text-sm text-gray-600 mt-1">
-                {conditions.find(c => c.id === selectedCondition).description}
-              </p>
-            )}
+              )
+            ))}
+          </select>
+
+          {/* Flecha custom */}
+           <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
           </div>
         )}
+          {/* Filter dropdown */}
+          {conditions.length > 0 && (
+          <div className="relative">
+             <select
+            id="condition-select"
+             value={filter}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setIndex(0);
+              }}
+            className="border rounded px-3 py-2 pr-10 text-sm bg-white text-gray-800 
+                      focus:outline-none focus:ring-2 focus:ring-blue-400 
+                      appearance-none text-center [text-align-last:center] w-auto min-w-[120px]"
+          >
+             <option value="all">Todos</option>
+              <option value="evaluated">Evaluados</option>
+              <option value="pending">Pendientes</option>
+          </select>
+
+          {/* Flecha custom */}
+           <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+          </div>
+        )}
+
+          
+
+          {/* Navigation button */}
+          <button
+            onClick={() => setShowSidebar(true)}
+            className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center gap-2 text-sm"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <span>Navegación</span>
+          </button>
+
+          {/* Product counter */}
+          <div className="ml-auto">
+            <span className="inline-block bg-[#5A8CD3] text-white font-bold px-4 py-2 rounded-xl text-sm">
+              {productsByPart.length > 0 ? index + 1 : 0} / {productsByPart.length}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Sidebar Navigation */}
@@ -306,146 +367,87 @@ export default function DescriptionVoting() {
               );
             })}
           </div>
-          <div className="mt-4 text-sm text-gray-600">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-4 h-4 bg-green-100 rounded"></div>
-              <span>Respondidas: {votes.length}</span>
-            </div>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-4 h-4 bg-yellow-100 rounded"></div>
-              <span>Saltadas: {skipped.length}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-gray-100 rounded"></div>
-              <span>Pendientes: {productsByPart.length - votes.length - skipped.length}</span>
-            </div>
-          </div>
         </div>
       </div>
       
       {/* Header with navigation and filters */}
-      <div className="mb-6">
-        <div className="flex flex-wrap items-center gap-4 bg-white p-4 rounded-lg shadow-sm">
-          {/* Navigation button */}
-          <button
-            onClick={() => setShowSidebar(true)}
-            className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center gap-2 text-sm"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-            <span>Navegación</span>
-          </button>
-          
-          {/* Filter dropdown */}
-          <div className="relative">
-            <select
-              value={filter}
-              onChange={(e) => {
-                setFilter(e.target.value);
-                setIndex(0);
-              }}
-              className="appearance-none border rounded px-3 py-2 pr-8 text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-              <option value="all">Todos</option>
-              <option value="evaluated">Evaluados</option>
-              <option value="pending">Pendientes</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Dataset selector */}
-          <div className="relative">
-            <select
-              value={part}
-              onChange={e => {
-                setPart(Number(e.target.value));
-                setIndex(0);
-                setVotes([]);
-                setSkipped([]);
-                setFinished(false);
-              }}
-              className="appearance-none border rounded px-3 py-2 pr-8 text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-              <option value={1}>Parte 1 (1–375)</option>
-              <option value={2}>Parte 2 (376–1075)</option>
-              <option value={3}>Parte 3 (1076–1775)</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Product counter */}
-          <div className="ml-auto">
-            <span className="inline-block bg-[#a9cce3] text-white font-bold px-4 py-2 rounded-xl shadow text-sm">
-              {productsByPart.length > 0 ? index + 1 : 0} / {productsByPart.length}
-            </span>
-          </div>
-        </div>
-      </div>
+      
       {!productsByPart.length ? (
         <div className="bg-white p-6 rounded-xl shadow-sm border text-center">
           <p className="text-gray-600">No hay productos disponibles para mostrar.</p>
         </div>
       ) : !finished ? (
         <>
-          <div className="space-y-6">
-            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border space-y-4">
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <h2 className="text-lg sm:text-xl font-medium text-gray-800 break-words max-w-[80%]">
-                  {currentProduct.name}
-                </h2>
-                <span
-                  className={`text-xs sm:text-sm font-semibold px-3 py-1 rounded-full shadow-sm ${
-                    currentProduct.evaluated
-                      ? "bg-green-50 text-green-700 border border-green-100"
-                      : "bg-yellow-50 text-yellow-700 border border-yellow-100"
-                  }`}
-                >
-                  {currentProduct.evaluated ? "✓ Evaluado" : "⏳ Pendiente"}
-                </span>
-              </div>
-              <p className="text-gray-600 italic text-sm sm:text-base">{currentProduct.og_description}</p>
-            </div>
+          <div className="space-y-4">
+          <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border">
+            
+      {/* Fila principal */}
+      <div className="flex justify-between items-center">
+        {/* Nombre con flechita */}
+        <button
+          onClick={() => setOpen(!open)}
+          className="flex items-center space-x-2 text-lg sm:text-xl font-medium text-gray-800 cursor-pointer focus:outline-none"
+        >
+          <span>{currentProduct.name}</span>
+          {open ? (
+            <ChevronUp className="w-5 h-5 text-gray-500" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-gray-500" />
+          )}
+        </button>
+
+        {/* Estado evaluado/pendiente */}
+        <span
+          className={`text-xs sm:text-sm font-semibold px-3 py-1 rounded-full ${
+            currentProduct.evaluated
+              ? "bg-green-50 text-green-700 border border-green-100"
+              : "bg-yellow-50 text-yellow-700 border border-yellow-100"
+          }`}
+        >
+          {currentProduct.evaluated ? "✓ Evaluado" : "⏳ Pendiente"}
+        </span>
+      </div>
+
+      {/* Imagen desplegable */}
+      {open && (
+        <div className="flex justify-center mt-4">
+          <div className="bg-white p-4 rounded-lg  ">
+            <img
+              src="/logo.png"
+              alt="Imagen del producto"
+              className="w-auto h-[20rem] object-cover rounded-lg"
+            />
+          </div>
+        </div>
+      )}
+    </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {randomizedOptions.map((desc, i) => (
                 <div
                   key={i}
                   onClick={() => handleVote(desc.model, desc.model.id)}
-                  className="cursor-pointer border rounded-xl p-4 hover:bg-gray-50 transition text-sm sm:text-base bg-white shadow-sm hover:shadow-md"
+                  className="cursor-pointer border rounded-xl p-4 hover:bg-gray-50 transition text-sm sm:text-base bg-white"
                 >
                   <p className="text-gray-800">{desc.generated_description}</p>
                 </div>
               ))}
               <div 
                 onClick={() => handleVote("Todas bien", 0)}
-                className="cursor-pointer border rounded-xl p-4 hover:bg-gray-50 transition text-sm sm:text-base text-center h-full flex items-center justify-center bg-white shadow-sm hover:shadow-md"
+                className="cursor-pointer border rounded-xl p-4 hover:bg-gray-50 transition text-sm sm:text-base text-center h-full flex items-center justify-center bg-white"
               >
                 <span className="text-gray-700">Todas están bien</span>
               </div>
             </div>
           </div>
           
-          <div className="flex justify-between gap-4 mt-6">
+          <div className="flex justify-end gap-4 mt-6 mb-6">
+          
             <button
               onClick={handleSkip}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl shadow hover:bg-gray-300 transition font-semibold"
+              className="px-4 py-2 bg-[#5A8CD3] text-white rounded-xl hover:bg-[#4A90E2] transition font-semibold"
             >
-              Saltar pregunta
-            </button>
-            <button
-              onClick={() => setFinished(true)}
-              className="px-4 py-2 bg-[#a9cce3] text-white rounded-xl shadow hover:bg-[#5499c7] transition font-semibold"
-            >
-              Terminar evaluación
+               Saltar pregunta
             </button>
           </div>
         </>
@@ -481,13 +483,14 @@ export default function DescriptionVoting() {
                 setSkipped([]);
                 setFinished(false);
               }}
-              className="px-4 py-2 bg-[#a9cce3] text-white rounded-xl shadow hover:bg-[#5499c7] transition font-semibold"
+              className="px-4 py-2 bg-[#a9cce3] text-white rounded-xl hover:bg-[#5499c7] transition font-semibold"
             >
               Reiniciar evaluación
             </button>
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
