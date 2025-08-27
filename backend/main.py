@@ -4,6 +4,9 @@ import os
 from dotenv import load_dotenv
 from routes.product_routes import product_routes
 from routes.file_routes import file_routes
+import redis
+
+redis_client = redis.Redis(host='redis', port=6379, db=0)
 
 load_dotenv()
 
