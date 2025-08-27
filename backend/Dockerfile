@@ -8,7 +8,8 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     FLASK_APP=main.py \
-    FLASK_ENV=production
+    FLASK_ENV=development \
+    FLASK_DEBUG=0
 
 # Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -18,7 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Copiar e instalar dependencias de Python
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt gunicorn
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar el código de la aplicación
 COPY . .
@@ -26,5 +27,5 @@ COPY . .
 # Puerto expuesto
 EXPOSE 10000
 
-# Comando para ejecutar la aplicación
-CMD ["gunicorn", "--bind", "0.0.0.0:10000", "main:app"]
+# Comando para ejecutar la aplicación con Flask
+CMD ["flask", "run", "--host=0.0.0.0", "--port=10000", "--no-debugger", "--no-reload"]
