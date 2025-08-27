@@ -2,8 +2,12 @@ from flask import Blueprint, jsonify, request
 from services.product_service import ProductService
 import redis
 import json
+import os
 
-redis_client = redis.Redis(host='127.0.0.1', port=6379)
+redis_client = redis.Redis(
+    host=os.getenv("REDIS_HOST", "127.0.0.1"),
+    port=int(os.getenv("REDIS_PORT", 6379)),
+)
 
 product_routes = Blueprint('products', __name__)
 

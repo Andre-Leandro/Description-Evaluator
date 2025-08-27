@@ -1,10 +1,41 @@
 name: description-evaluator
+
 services:
   redis: 
     image: redis:latest
     container_name: redis
     ports:
       - "6379:6379"
+
+  backend:
+    image: description-evaluator-backend
+    container_name: backend
+    ports:
+      - "10000:10000"
+    depends_on:
+      - redis
+    environment:
+      # Postgres (Supabase)
+      - POSTGRES_USER=postgres.illglqdcmfjqktkyxhhh
+      - POSTGRES_PASSWORD=Strata-ce-2025
+      - POSTGRES_HOST=aws-0-us-east-2.pooler.supabase.com
+      - POSTGRES_PORT=6543
+      - POSTGRES_DB=postgres
+      # Redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+  frontend:
+    image: description-evaluator-frontend
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend 
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:10000
+
+  
       
   
     
