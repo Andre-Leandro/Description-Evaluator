@@ -229,7 +229,7 @@ export default function DescriptionVoting() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="max-w-6xl mx-auto p-6">
-        <div className="bg-white rounded-2xl mb-3 shadow-lg p-4 space-y-6 relative">
+        <div className="bg-white rounded-2xl mb-4 shadow-lg p-4 space-y-6 relative">
         <div className="text-center mt-4">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Evaluación </h2>
         <p className="text-gray-600">Elija la opción que mejor se ajusta a sus necesidades</p>
@@ -378,7 +378,7 @@ export default function DescriptionVoting() {
         </div>
       ) : !finished ? (
         <>
-          <div className="space-y-3">
+          <div className="space-y-4">
           <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border">
             
       {/* Fila principal */}
