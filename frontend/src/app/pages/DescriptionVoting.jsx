@@ -395,11 +395,12 @@ export default function DescriptionVoting() {
                 <div className="flex-shrink-0">
                   <img 
                     src="/logo.png" 
+                    width={164}
+                    height={164} 
                     alt="Imagen del producto" 
-                    className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                    className="w-80 h-70 object-cover rounded-lg border border-gray-200"
                   />
                 </div>
-                <p className="text-gray-600 italic text-sm sm:text-base text-left">Imagen del producto</p>
               </div>
             </div>
             
