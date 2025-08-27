@@ -1,17 +1,21 @@
 from flask import Blueprint, jsonify, request
 from services.product_service import ProductService
+import redis
+import json
+
+redis_client = redis.Redis(host='127.0.0.1', port=6379)
 
 product_routes = Blueprint('products', __name__)
 
 @product_routes.route('/products', methods=['GET'])
 def get_products():
-    """
-    Get all products with their descriptions and evaluations
-    Returns:
-        JSON: List of products with their descriptions and evaluations
-    """
     try:
+        if redis_client.exists('products'):
+            products = redis_client.get('products')
+            products = json.loads(products)
+            return jsonify({"products": products})
         products = ProductService.get_all_products()
+        redis_client.set('products', json.dumps(products))
         return jsonify({"products": products})
     except Exception as e:
         print(f"❌ Error getting products: {e}")
