@@ -16,11 +16,8 @@ services:
       - redis
     environment:
       # Postgres (Supabase)
-      - POSTGRES_USER=postgres.illglqdcmfjqktkyxhhh
-      - POSTGRES_PASSWORD=Strata-ce-2025
-      - POSTGRES_HOST=aws-0-us-east-2.pooler.supabase.com
-      - POSTGRES_PORT=6543
-      - POSTGRES_DB=postgres
+     
+
       # Redis
       - REDIS_HOST=redis
       - REDIS_PORT=6379
