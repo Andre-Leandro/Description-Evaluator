@@ -48,26 +48,20 @@ export default function CSVDownload() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-6 mt-18">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="max-w-6xl mx-auto p-6">
+        <div className="bg-white rounded-2xl shadow-lg p-8 space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Descargar CSV</h2>
         <p className="text-gray-600">Descarga los datos de productos en formato CSV</p>
       </div>
 
-      {/* CSV Format Information */}
-      <div className="bg-blue-50 p-6 rounded-lg">
-        <h3 className="text-lg font-medium text-blue-900 mb-3">Formato del CSV</h3>
-        <div className="text-blue-800 space-y-2">
-          <p>El archivo CSV contendrá las siguientes columnas:</p>
-          <ul className="list-disc list-inside space-y-1 text-sm">
-            <li><strong>nombre_producto:</strong> Nombre del producto</li>
-            <li><strong>descripcion:</strong> Descripción del producto</li>
-            <li><strong>meta_titulo:</strong> Meta título SEO</li>
-            <li><strong>meta_descripcion:</strong> Meta descripción SEO</li>
-            <li><strong>id_imagen:</strong> ID de la imagen asociada</li>
-          </ul>
-        </div>
-      </div>
+          {/* CSV Format Information */}
+          <div className="text-center">
+            <p className="text-gray-600 text-sm">
+              Formato del CSV: <strong>nombre_producto, descripcion, meta_titulo, meta_descripcion, id_imagen</strong>
+            </p>
+          </div>
 
       {/* Download Section */}
       <div className="bg-white border-2 border-gray-200 rounded-lg p-8 text-center">
@@ -140,6 +134,8 @@ export default function CSVDownload() {
           <li>• Puedes abrir el archivo con Excel, Google Sheets o cualquier editor de CSV</li>
           <li>• El formato utiliza comas como separador y UTF-8 como codificación</li>
         </ul>
+      </div>
+        </div>
       </div>
     </div>
   );
