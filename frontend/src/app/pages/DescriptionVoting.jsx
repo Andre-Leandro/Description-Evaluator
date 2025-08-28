@@ -23,7 +23,7 @@ export default function DescriptionVoting() {
     const { data } = supabase
       .storage
       .from("SmartCatalog")
-      .getPublicUrl(`imagenes/${path}`);
+      .getPublicUrl(`imagenes/${path}.png`);
     return data.publicUrl;
   };
   
@@ -412,7 +412,7 @@ export default function DescriptionVoting() {
         <div className="flex justify-center mt-4">
           <div className="bg-white p-4 rounded-lg  ">
             <img
-              src= {getImageUrl("bh.png")}
+              src= {getImageUrl(currentProduct.id)}
               alt="Imagen del producto" 
               className="w-auto h-[20rem] object-cover rounded-lg"
             />
