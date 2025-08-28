@@ -97,23 +97,10 @@ export default function DescriptionVoting() {
     const allConditions = [];
     const seenConditionIds = new Set();
     
-    // If we have products but no conditions, log the first product's structure
-    if (products.length > 0) {
-
-      // Check if descriptions exist and log their structure
-      if (products[0].descriptions) {
-        console.log('First product has descriptions array, length:', products[0].descriptions.length);
-        if (products[0].descriptions.length > 0) {
-          console.log('First description structure:', JSON.parse(JSON.stringify(products[0].descriptions[0])));
-          console.log('Keys in first description:', Object.keys(products[0].descriptions[0]));
-        }
-      }
-    }
-    
     // Collect all unique conditions from all descriptions across all products
-    products.forEach((product, productIndex) => {
+    products.forEach((product) => {
       if (product.descriptions && product.descriptions.length > 0) {
-        product.descriptions.forEach((description, descIndex) => {
+        product.descriptions.forEach((description) => {
           // Try different possible paths to find the condition
           let condition = null;
           
@@ -127,7 +114,6 @@ export default function DescriptionVoting() {
           }
           
           if (condition && condition.id && !seenConditionIds.has(condition.id)) {
-            console.log(`Found condition in product ${productIndex} description ${descIndex}:`, condition);
             seenConditionIds.add(condition.id);
             allConditions.push({
               id: condition.id,
@@ -142,36 +128,39 @@ export default function DescriptionVoting() {
     // Always ensure we have at least one condition
     if (allConditions.length === 0) {
       console.warn('No conditions found in the data. Using default condition.');
-      // Return a default condition if none found
-      return [{ id: 1, name: 'Condition 1' }];
+      return [{ id: 2, name: 'Condition 2' }];
     }
-    // Sort by ID for consistent ordering
-    return allConditions.sort((a, b) => a.id - b.id);
+    
+    // Sort with condition 2 first, then others by ID
+    return allConditions.sort((a, b) => {
+      if (a.id === 2) return -1;
+      if (b.id === 2) return 1;
+      return a.id - b.id;
+    });
   }, [products]);
 
-  // Update selected condition if it doesn't exist in the conditions list
+  // Set default condition to 2 if available, otherwise use first condition
   useEffect(() => {
-    if (conditions.length > 0 && !conditions.some(c => c.id === selectedCondition)) {
-      setSelectedCondition(conditions[0]?.id || 1);
+    if (conditions.length > 0) {
+      const condition2 = conditions.find(c => c.id === 2);
+      setSelectedCondition(condition2 ? 2 : conditions[0]?.id);
     }
-  }, [conditions, selectedCondition]);
+  }, [conditions]);
 
-  // Filtrar productos por la condición seleccionada y dividir el dataset según la parte seleccionada
+  // Filtrar productos por la condición 2
   const productsByPart = useMemo(() => {
     if (!products.length) return [];
     
-    // Primero filtramos por la condición seleccionada
+    // Filtramos solo los productos que tengan descripciones para la condición 2
     let filtered = products.filter(product => {
-      // Si el producto tiene descripciones, verificamos si alguna coincide con la condición
       if (product.descriptions && product.descriptions.length > 0) {
         return product.descriptions.some(desc => {
-          // Buscamos la condición en diferentes ubicaciones posibles
           const condition = desc.condition || 
                           (desc.evaluation && desc.evaluation.condition) || 
                           (desc.model && desc.model.condition);
           
-          // Si encontramos una condición, verificamos si coincide con la seleccionada
-          return condition && condition.id === selectedCondition;
+          // Solo incluir productos de la condición 2
+          return condition && condition.id === 2;
         });
       }
       return false;
