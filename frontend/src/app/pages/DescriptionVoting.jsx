@@ -4,6 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 import useProducts from "../../hooks/useProduct";
 import useVote from "../../hooks/useVote";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 export default function DescriptionVoting() {
   const { products, loading, error } = useProducts();
@@ -17,6 +18,15 @@ export default function DescriptionVoting() {
   const [showSidebar, setShowSidebar] = useState(false); // Sidebar visibility
   const [selectedCondition, setSelectedCondition] = useState(1); // Default to condition ID 1
   const [open, setOpen] = useState(false);
+
+  const getImageUrl = (path) => {
+    const { data } = supabase
+      .storage
+      .from("SmartCatalog")
+      .getPublicUrl(`imagenes/${path}`);
+    return data.publicUrl;
+  };
+  
 
 
   const handleVote = async (modelName, modelId) => {
@@ -413,8 +423,8 @@ export default function DescriptionVoting() {
         <div className="flex justify-center mt-4">
           <div className="bg-white p-4 rounded-lg  ">
             <img
-              src="/logo.png"
-              alt="Imagen del producto"
+              src= {getImageUrl("bh.png")}
+              alt="Imagen del producto" 
               className="w-auto h-[20rem] object-cover rounded-lg"
             />
           </div>
