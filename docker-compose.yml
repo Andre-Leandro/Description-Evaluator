@@ -1,0 +1,37 @@
+name: description-evaluator
+
+services:
+  redis: 
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: ./backend
+    container_name: backend
+    ports:
+      - "10000:10000"
+    depends_on:
+      - redis
+    environment:
+      # Postgres (Supabase)
+      - user=${POSTGRES_USER}
+      - password=${POSTGRES_PASSWORD}
+      - host=${POSTGRES_HOST}
+      - port=${POSTGRES_PORT}
+      - dbname=${POSTGRES_DB}
+      # Redis
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend

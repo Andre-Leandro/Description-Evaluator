@@ -8,6 +8,10 @@ WORKDIR /app
 COPY package*.json ./
 COPY . .
 
+# Declarar ARG y pasarlo a ENV (para que Next lo tome en el build)
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 # Instalar dependencias y construir la aplicación
 RUN npm ci
 RUN npm run build

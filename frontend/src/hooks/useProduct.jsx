@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL 
+const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 export default function useProducts() {
   const [products, setProducts] = useState([]);
@@ -10,7 +10,9 @@ export default function useProducts() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log("Pidiendo productos a...", `${API_URL}/products`)
     fetch(`${API_URL}/products`)
+
       .then((res) => res.json())
       .then((data) => {
         console.log("Respuesta del backend:", data);
