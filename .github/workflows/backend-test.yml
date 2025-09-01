@@ -1,0 +1,54 @@
+name: Backend Test (DevOps)
+
+on:
+  push:
+    branches: [ DevOps ]
+  pull_request:
+    branches: [ DevOps ]
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest requests
+
+      - name: Crear .env dummy
+        run: |
+          echo "user=postgres" > .env
+          echo "password=admin" >> .env
+          echo "host=localhost" >> .env
+          echo "portdb=5432" >> .env
+          echo "dbname=evaluador_db" >> .env
+
+      - name: Run backend in background
+        run: |
+          python main.py & 
+          sleep 10
+
+      - name: Run backend tests
+        run: pytest test_api.py
+        
+  deploy-render:
+    needs: test-backend
+    runs-on: ubuntu-latest
+    if: success() # Solo si los tests pasan
+    steps:
+      - name: Deploy to Render
+        run: |
+            curl -X POST "https://api.render.com/v1/services/<SERVICE_ID>/deploys" \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
