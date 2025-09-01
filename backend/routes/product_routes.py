@@ -4,28 +4,28 @@ import redis
 import json
 import os
 
-"""
+
 redis_client = redis.Redis(
     host=os.getenv("REDIS_HOST", "127.0.0.1"),
     port=int(os.getenv("REDIS_PORT", 6379)),
 )
-"""
+
 
 product_routes = Blueprint('products', __name__)
 
 @product_routes.route('/products', methods=['GET'])
 def get_products():
     try:
-        """
+        
         if redis_client.exists('products'):
             products = redis_client.get('products')
             products = json.loads(products)
             return jsonify({"products": products})
-        """
+        
         products = ProductService.get_all_products()
-        """
+        
         redis_client.set('products', json.dumps(products))
-        """
+        
         return jsonify({"products": products})
     except Exception as e:
         print(f"❌ Error getting products: {e}")
