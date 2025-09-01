@@ -1,31 +1,44 @@
-# Etapa 1: Construir la app
+# Etapa de construcción
 FROM node:20-alpine AS builder
+
+# Establecer el directorio de trabajo
 WORKDIR /app
 
-# Copiar package.json y package-lock.json / pnpm-lock.yaml si lo usas
+# Copiar archivos de configuración
 COPY package*.json ./
-
-# Instalar dependencias
-RUN npm install
-
-# Copiar todo el código
 COPY . .
 
-# Construir la app para producción
+# Declarar ARG y pasarlo a ENV (para que Next lo tome en el build)
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+
+# Instalar dependencias y construir la aplicación
+RUN npm ci
 RUN npm run build
 
-# Etapa 2: Servir la app
+# Etapa de producción
 FROM node:20-alpine AS runner
+
+# Establecer el directorio de trabajo
 WORKDIR /app
 
-# Copiar solo lo necesario del builder
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./.next
+# Copiar archivos necesarios
+COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
-# Exponer el puerto de Next.js
+# Puerto en el que se ejecutará la aplicación
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
+# Exponer el puerto
 EXPOSE 3000
 
-# Arrancar la app en modo producción
-CMD ["npm", "run", "start"]
+# Comando para iniciar la aplicación
+CMD ["node", "server.js"]

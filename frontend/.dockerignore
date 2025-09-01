@@ -1,0 +1,38 @@
+# Dependencies
+node_modules
+/.next
+/.git
+
+# Environment variables
+.env*.local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local env files
+.env*.local
+.env
+
+# Build output
+/out
+
+# Cache
+.cache
+.next/cache
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+*.pem
+
+# Testing
+coverage
+
+# Misc
+*.md
+*.log

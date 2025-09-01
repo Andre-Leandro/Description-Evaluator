@@ -1,24 +1,31 @@
-# Imagen base de Python
-FROM python:3.11-slim
+# Usar una imagen base de Python
+FROM python:3.10-slim
 
-# Crear un directorio de trabajo en el contenedor
-WORKDIR /backend
+# Establecer el directorio de trabajo
+WORKDIR /app
 
-# Copiar requirements.txt al contenedor
+# Variables de entorno
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    FLASK_APP=main.py \
+    FLASK_ENV=development \
+    FLASK_DEBUG=0
+
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar e instalar dependencias de Python
 COPY requirements.txt .
-
-# Instalar dependencias
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar el resto del código de la API
+# Copiar el código de la aplicación
 COPY . .
 
-# Exponer el puerto donde correrá Flask
-EXPOSE 5000
+# Puerto expuesto
+EXPOSE 10000
 
-# Variable de entorno para Flask
-ENV FLASK_APP=app.py
-ENV FLASK_RUN_HOST=0.0.0.0
-
-# Comando para arrancar la API
-CMD ["flask", "run"]
+# Comando para ejecutar la aplicación con Flask
+CMD ["flask", "run", "--host=0.0.0.0", "--port=10000", "--no-debugger", "--no-reload"]

@@ -13,24 +13,7 @@ else:
 class ProductService:
     @staticmethod
     def get_all_products():
-        """Get all products with their descriptions and evaluations"""
-        if not Session:
-            # Return mock data for development
-            return [
-                {
-                    "id": 1,
-                    "name": "Sample Product 1",
-                    "og_description": "Original description for product 1",
-                    "evaluated": False,
-                    "vote": None,
-                    "descriptions": [
-                        {"model": {"id": 1, "name": "Model A"}, "generated_description": "Generated description A"},
-                        {"model": {"id": 2, "name": "Model B"}, "generated_description": "Generated description B"}
-                    ],
-                    "evaluations": []
-                }
-            ]
-        
+ 
         session = Session()
         try:
             # Get all products with their descriptions and evaluations

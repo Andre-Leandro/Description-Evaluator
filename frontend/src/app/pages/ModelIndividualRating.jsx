@@ -86,7 +86,9 @@ export default function ModelIndividualRating() {
   );
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="max-w-2xl mx-auto p-6">
+        <div className="bg-white rounded-2xl shadow-lg p-8 space-y-6">
       <div className="mb-6 relative w-64">
         <label className="font-semibold block mb-2">Seleccione un modelo</label>
         <div className="relative">
@@ -127,6 +129,16 @@ export default function ModelIndividualRating() {
         <p className="text-lg font-medium text-gray-700 mb-1">
           {currentProduct.name}
         </p>
+        <div className="flex items-center gap-4 mb-4">
+          <div className="flex-shrink-0">
+            <img 
+              src="/logo.png" 
+              alt="Imagen del producto" 
+              className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+            />
+          </div>
+          <p className="text-gray-600 italic text-sm">Imagen del producto</p>
+        </div>
         <p className="text-gray-600 italic mb-4">{desc.text}</p>
         <div className="flex justify-center gap-8 mt-4">
           <button
@@ -176,6 +188,8 @@ export default function ModelIndividualRating() {
         >
           Terminar evaluación
         </button>
+        </div>
+        </div>
       </div>
     </div>
   );

@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Description Evaluator",
-  description: "Compará y evaluá descripciones generadas por modelos.",
+  title: "SmartCatalog",
+  description: "Genera, compara y evaluá descripciones generadas por modelos de IA.",
   icons: {
     icon: "/favicon.ico",
   },
