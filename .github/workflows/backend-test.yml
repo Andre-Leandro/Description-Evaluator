@@ -27,18 +27,27 @@ jobs:
           pip install -r requirements.txt
           pip install pytest requests
 
-      - name: Crear .env dummy
+      - name: Configurar servicio Redis
+        uses: shogo82148/actions-setup-redis@v1
+        with:
+          redis-version: '6.x'
+
+      - name: Crear .env para tests
         run: |
-          echo "user=postgres" > .env
-          echo "password=admin" >> .env
-          echo "host=localhost" >> .env
-          echo "portdb=5432" >> .env
-          echo "dbname=evaluador_db" >> .env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > .env
+          echo "user=${{ secrets.DB_USER }}" >> .env
+          echo "password=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "host=${{ secrets.DB_HOST }}" >> .env
+          echo "portdb=${{ secrets.DB_PORT }}" >> .env
+          echo "dbname=${{ secrets.DB_NAME }}" >> .env
+          echo "REDIS_HOST=127.0.0.1" >> .env
+          echo "REDIS_PORT=6379" >> .env
+          echo "REDIS_DB=0" >> .env
 
       - name: Run backend in background
         run: |
           python main.py & 
-          sleep 10
+          sleep 15  # Aumentamos el tiempo para asegurar que el backend esté listo
 
       - name: Run backend tests
         run: pytest test_api.py
