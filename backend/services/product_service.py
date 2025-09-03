@@ -33,14 +33,9 @@ class ProductService:
                 # Convert product to dict with all relationships
                 product_dict = product.to_dict(include_descriptions=True, include_evaluations=True)
                 
-                # For backward compatibility, include the first evaluation's vote if any
-                if product.evaluations:
-                    first_eval = product.evaluations[0]
-                    product_dict["evaluated"] = first_eval.evaluated # Mal
-                    product_dict["vote"] = first_eval.vote
-                else:
-                    product_dict["evaluated"] = False
-                    product_dict["vote"] = None
+                # Don't override the evaluated property from the model
+                # The to_dict method already includes the correct evaluated property
+                # that checks if ANY evaluation exists for this product
                 
                 result.append(product_dict)
                 
