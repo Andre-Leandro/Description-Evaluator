@@ -442,12 +442,12 @@ export default function DescriptionVoting() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {randomizedOptions.map((desc, i) => {
                 const votedModel = getVotedModelForProduct(currentProduct, selectedCondition);
-                const isVoted = votedModel && votedModel.name === desc.model;
+                const isVoted = votedModel && votedModel.name === desc.model?.name;
                 
                 return (
                   <div
                     key={i}
-                    onClick={() => handleVote(desc.model, desc.model.id)}
+                    onClick={() => handleVote(desc.model?.name, desc.model?.id)}
                     className={`cursor-pointer border rounded-xl p-4 hover:bg-gray-50 transition text-sm sm:text-base ${
                       isVoted 
                         ? "bg-gray-100 border-gray-300 shadow-md" // Darker/shadowed appearance for voted option
