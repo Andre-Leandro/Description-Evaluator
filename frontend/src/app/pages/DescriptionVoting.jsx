@@ -446,7 +446,7 @@ export default function DescriptionVoting() {
               onClick={handleSkip}
               className="px-4 py-2 bg-[#5A8CD3] text-white rounded-xl hover:bg-[#4A90E2] transition font-semibold"
             >
-               Saltar pregunta
+               Saltar producto
             </button>
           </div>
         </>
