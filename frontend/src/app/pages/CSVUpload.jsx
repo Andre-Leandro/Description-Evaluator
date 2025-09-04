@@ -324,7 +324,7 @@ export default function CSVUpload() {
                         onChange={(e) => setDbConnectionString(e.target.value)}
                       />
                       <p className="mt-1 text-xs text-gray-500 pt-3 pb-1">
-                        Ingresa tu cadena de conexión. Compatible con PostgreSQL, MySQL y SQL Server.
+                        Introduce los datos de conexión de tu base de datos.
                       </p>
                     </div>
                     
