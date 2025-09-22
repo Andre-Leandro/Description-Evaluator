@@ -9,7 +9,7 @@ load_dotenv()
 USER = os.getenv("user")
 PASSWORD = os.getenv("password")
 HOST = os.getenv("host")
-PORT = os.getenv("portdb")
+PORT = os.getenv("port")
 DBNAME = os.getenv("dbname")
 
 # Check if all required environment variables are present
