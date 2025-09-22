@@ -25,11 +25,11 @@ jobs:
 
       - name: Export environment variables
         run: |
-          echo "user=${{ secrets.DB_USER }}" >> $GITHUB_ENV
-          echo "password=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
-          echo "host=${{ secrets.DB_HOST }}" >> $GITHUB_ENV
-          echo "port=${{ secrets.DB_PORT }}" >> $GITHUB_ENV
-          echo "dbname=${{ secrets.DB_NAME }}" >> $GITHUB_ENV
+          echo "db_user=${{ secrets.DB_USER }}" >> $GITHUB_ENV
+          echo "db_password=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
+          echo "db_host=${{ secrets.DB_HOST }}" >> $GITHUB_ENV
+          echo "db_port=${{ secrets.DB_PORT }}" >> $GITHUB_ENV
+          echo "db_name=${{ secrets.DB_NAME }}" >> $GITHUB_ENV
           echo "REDIS_HOST=redis-17428.c56.east-us.azure.redns.redis-cloud.com" >> $GITHUB_ENV
           echo "REDIS_PORT=17428" >> $GITHUB_ENV
           echo "REDIS_PASSWORD=iqaLW1kalNrUmpx7LdlQA0RQ1bVpIeYe" >> $GITHUB_ENV
@@ -40,16 +40,13 @@ jobs:
       - name: Build & Push images using Docker Compose
         run: |
           docker compose build
-          docker tag backend devopsregistrytp.azurecr.io/backend:latest
-          docker tag frontend devopsregistrytp.azurecr.io/frontend:latest
-          docker push devopsregistrytp.azurecr.io/backend:latest
-          docker push devopsregistrytp.azurecr.io/frontend:latest
+          docker compose push  # <- Compose se encarga de pushear las imágenes con tag
 
       - name: Azure CLI login
         run: |
           az login -u "${{ secrets.AZURE_USERNAME }}" -p "${{ secrets.AZURE_PASSWORD }}"
 
-      - name: Deploy Backend
+            - name: Deploy Backend
         run: |
           az container delete --resource-group tp-devops --name backend --yes || true
           az container create \
@@ -58,15 +55,26 @@ jobs:
             --image devopsregistrytp.azurecr.io/backend:latest \
             --cpu 1 --memory 1 \
             --ports 10000 \
+            --ip-address public \
             --environment-variables \
-              user=${user} \
-              password=${password} \
-              host=${host} \
-              port=${port} \
-              dbname=${dbname} \
+              user=${db_user} \
+              password=${db_password} \
+              host=${db_host} \
+              port=${db_port} \
+              dbname=${db_name} \
               REDIS_HOST=${REDIS_HOST} \
               REDIS_PORT=${REDIS_PORT} \
               REDIS_PASSWORD=${REDIS_PASSWORD}
+
+      - name: Get Backend Public IP
+        id: get-backend-ip
+        run: |
+          BACKEND_IP=$(az container show \
+            --resource-group tp-devops \
+            --name backend \
+            --query ipAddress.ip \
+            -o tsv)
+          echo "BACKEND_IP=$BACKEND_IP" >> $GITHUB_ENV
 
       - name: Deploy Frontend
         run: |
@@ -78,6 +86,7 @@ jobs:
             --cpu 1 --memory 1 \
             --ports 3000 \
             --environment-variables \
-              NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL} \
+              NEXT_PUBLIC_API_URL=http://${BACKEND_IP}:10000 \
               NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL} \
               NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
+

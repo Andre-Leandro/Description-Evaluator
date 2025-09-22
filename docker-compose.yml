@@ -1,28 +1,26 @@
-version: "3.9"
-
 services:
   redis:
-    image: redis:latest # o devopsregistrytp.azurecr.io/redis:latest si la subiste a ACR
+    image: redis:latest
     container_name: redis
     ports:
       - "6379:6379"
     environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD} # solo si querés autenticación local
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
 
   backend:
     build: ./backend
+    image: devopsregistrytp.azurecr.io/backend:latest  # <- Tag correcto para push
     container_name: backend
     ports:
       - "10000:10000"
     depends_on:
       - redis
     environment:
-      # Postgres (supabase)
-      - user=${DB_USER}
-      - password=${DB_PASSWORD}
-      - host=${DB_HOST}
-      - port=${DB_PORT}
-      - dbname=${DB_NAME}
+      - user=${db_user}
+      - password=${db_password}
+      - host=${db_host}
+      - port=${db_port}
+      - dbname=${db_name}
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
@@ -34,6 +32,7 @@ services:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
         NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
         NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
+    image: devopsregistrytp.azurecr.io/frontend:latest  # <- Tag correcto para push
     container_name: frontend
     ports:
       - "3000:3000"
