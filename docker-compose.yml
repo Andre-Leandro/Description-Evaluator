@@ -1,11 +1,13 @@
-name: description-evaluator
+version: "3.9"
 
 services:
-  redis: 
-    image: redis:latest
+  redis:
+    image: redis:latest # o devopsregistrytp.azurecr.io/redis:latest si la subiste a ACR
     container_name: redis
     ports:
       - "6379:6379"
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD} # solo si querés autenticación local
 
   backend:
     build: ./backend
@@ -15,16 +17,15 @@ services:
     depends_on:
       - redis
     environment:
-      # Postgres (Supabase)
-      - user=${POSTGRES_USER}
-      - password=${POSTGRES_PASSWORD}
-      - host=${POSTGRES_HOST}
-      - port=${POSTGRES_PORT}
-      - dbname=${POSTGRES_DB}
-      # Redis
+      # Postgres (supabase)
+      - user=${DB_USER}
+      - password=${DB_PASSWORD}
+      - host=${DB_HOST}
+      - port=${DB_PORT}
+      - dbname=${DB_NAME}
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
-
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
 
   frontend:
     build:
