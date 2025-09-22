@@ -2,9 +2,9 @@ name: Backend Test (Docker)
 
 on:
   push:
-    branches: [ docker ]
+    branches: [docker]
   pull_request:
-    branches: [ docker ]
+    branches: [docker]
 
 jobs:
   test-backend:
@@ -19,7 +19,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
@@ -30,7 +30,7 @@ jobs:
       - name: Configurar servicio Redis
         uses: shogo82148/actions-setup-redis@v1
         with:
-          redis-version: '6.x'
+          redis-version: "6.x"
 
       - name: Crear .env para tests
         run: |
@@ -38,7 +38,7 @@ jobs:
           echo "user=${{ secrets.DB_USER }}" >> .env
           echo "password=${{ secrets.DB_PASSWORD }}" >> .env
           echo "host=${{ secrets.DB_HOST }}" >> .env
-          echo "portdb=${{ secrets.DB_PORT }}" >> .env
+          echo "port=${{ secrets.DB_PORT }}" >> .env
           echo "dbname=${{ secrets.DB_NAME }}" >> .env
 
       - name: Run backend in background
@@ -48,7 +48,7 @@ jobs:
 
       - name: Run backend tests
         run: pytest test_api.py
-        
+
   deploy-render:
     needs: test-backend
     runs-on: ubuntu-latest
@@ -56,5 +56,5 @@ jobs:
     steps:
       - name: Deploy to Render
         run: |
-            curl -X POST "https://api.render.com/v1/services/<SERVICE_ID>/deploys" \
-            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
+          curl -X POST "https://api.render.com/v1/services/<SERVICE_ID>/deploys" \
+          -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
