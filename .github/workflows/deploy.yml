@@ -15,13 +15,31 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Login en ACR
+      # Login en ACR (para docker build/push)
       - name: Log in to ACR
         uses: azure/docker-login@v1
         with:
           login-server: devopsregistrytp.azurecr.io
           username: devopsregistrytp
           password: R4vrzbA7fAuzv8L1jcFqIEorWmW/DnPUEh2bzet+95+ACRDKleJv
+
+      # Login a Azure con el SP (PELADO, SOLO PRUEBA)
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: |
+            {
+              "clientId": "9f50ed35-218d-4af0-922f-12bde1825ef7",
+              "clientSecret": "UOU8Q~UUxDOOP49NtOsQyCmKpSR.L~j4_tUW8cIG",
+              "subscriptionId": "811d5445-f311-40c1-be02-5f92a5819ee2",
+              "tenantId": "35e9cd03-43d0-4947-b582-a6965c4cb674",
+              "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
+              "resourceManagerEndpointUrl": "https://management.azure.com/",
+              "activeDirectoryGraphResourceId": "https://graph.windows.net/",
+              "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
+              "galleryEndpointUrl": "https://gallery.azure.com/",
+              "managementEndpointUrl": "https://management.core.windows.net/"
+            }
 
       - name: Export environment variables
         run: |
