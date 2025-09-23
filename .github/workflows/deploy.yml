@@ -67,6 +67,7 @@ jobs:
             --name backend \
             --image devopsregistrytp.azurecr.io/backend:latest \
             --cpu 1 --memory 1 \
+            --os-type Linux \
             --ports 10000 \
             --ip-address public \
             --registry-login-server devopsregistrytp.azurecr.io \
@@ -102,6 +103,7 @@ jobs:
             --name frontend \
             --image devopsregistrytp.azurecr.io/frontend:latest \
             --cpu 1 --memory 1 \
+            --os-type Linux \
             --ports 3000 \
             --ip-address public \
             --registry-login-server devopsregistrytp.azurecr.io \
