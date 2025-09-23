@@ -115,7 +115,7 @@ jobs:
             --image devopsregistrytp.azurecr.io/frontend:latest \
             --cpu 1 --memory 1 \
             --os-type Linux \
-            --ports 3000 \
+            --ports 80 \
             --ip-address public \
             --dns-name-label frontend-tp-devops \
             --registry-login-server devopsregistrytp.azurecr.io \
