@@ -33,18 +33,13 @@ jobs:
           echo "REDIS_HOST=redis-17428.c56.east-us.azure.redns.redis-cloud.com" >> $GITHUB_ENV
           echo "REDIS_PORT=17428" >> $GITHUB_ENV
           echo "REDIS_PASSWORD=iqaLW1kalNrUmpx7LdlQA0RQ1bVpIeYe" >> $GITHUB_ENV
-          echo "NEXT_PUBLIC_API_URL=http://20.120.45.12:10000" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_SUPABASE_URL=https://illglqdcmfjqktkyxhhh.supabase.co" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_GvcxsZEZvkvsrDj6qhlbkw_2Gb8sFF6" >> $GITHUB_ENV
 
       - name: Build & Push images using Docker Compose
         run: |
           docker compose build
-          docker compose push  # <- Compose se encarga de pushear las imágenes con tag
-
-      - name: Azure CLI login
-        run: |
-          az login -u "${{ secrets.AZURE_USERNAME }}" -p "${{ secrets.AZURE_PASSWORD }}"
+          docker compose push
 
       - name: Deploy Backend
         run: |
@@ -56,6 +51,10 @@ jobs:
             --cpu 1 --memory 1 \
             --ports 10000 \
             --ip-address public \
+            --registry-login-server devopsregistrytp.azurecr.io \
+            --registry-username devopsregistrytp \
+            --registry-password R4vrzbA7fAuzv8L1jcFqIEorWmW/DnPUEh2bzet+95+ACRDKleJv \
+            --restart always \
             --environment-variables \
               user=${db_user} \
               password=${db_password} \
@@ -75,6 +74,7 @@ jobs:
             --query ipAddress.ip \
             -o tsv)
           echo "BACKEND_IP=$BACKEND_IP" >> $GITHUB_ENV
+          echo "Backend levantado en: http://$BACKEND_IP:10000"
 
       - name: Deploy Frontend
         run: |
@@ -85,6 +85,11 @@ jobs:
             --image devopsregistrytp.azurecr.io/frontend:latest \
             --cpu 1 --memory 1 \
             --ports 3000 \
+            --ip-address public \
+            --registry-login-server devopsregistrytp.azurecr.io \
+            --registry-username devopsregistrytp \
+            --registry-password R4vrzbA7fAuzv8L1jcFqIEorWmW/DnPUEh2bzet+95+ACRDKleJv \
+            --restart always \
             --environment-variables \
               NEXT_PUBLIC_API_URL=http://${BACKEND_IP}:10000 \
               NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL} \
