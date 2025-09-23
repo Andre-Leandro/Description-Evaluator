@@ -70,6 +70,7 @@ jobs:
             --os-type Linux \
             --ports 10000 \
             --ip-address public \
+            --dns-name-label backend-tp-devops \
             --registry-login-server devopsregistrytp.azurecr.io \
             --registry-username devopsregistrytp \
             --registry-password R4vrzbA7fAuzv8L1jcFqIEorWmW/DnPUEh2bzet+95+ACRDKleJv \
@@ -116,6 +117,7 @@ jobs:
             --os-type Linux \
             --ports 3000 \
             --ip-address public \
+            --dns-name-label frontend-tp-devops \
             --registry-login-server devopsregistrytp.azurecr.io \
             --registry-username devopsregistrytp \
             --registry-password R4vrzbA7fAuzv8L1jcFqIEorWmW/DnPUEh2bzet+95+ACRDKleJv \
