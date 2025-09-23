@@ -23,7 +23,7 @@ jobs:
           username: devopsregistrytp
           password: R4vrzbA7fAuzv8L1jcFqIEorWmW/DnPUEh2bzet+95+ACRDKleJv
 
-      # Login a Azure con el SP (PELADO, SOLO PRUEBA)
+      # Login a Azure con el SP
       - name: Azure Login
         uses: azure/login@v1
         with:
@@ -54,10 +54,10 @@ jobs:
           echo "NEXT_PUBLIC_SUPABASE_URL=https://illglqdcmfjqktkyxhhh.supabase.co" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_GvcxsZEZvkvsrDj6qhlbkw_2Gb8sFF6" >> $GITHUB_ENV
 
-      - name: Build & Push images using Docker Compose
+      - name: Build & Push Backend image
         run: |
-          docker compose build
-          docker compose push
+          docker build -t devopsregistrytp.azurecr.io/backend:latest ./backend
+          docker push devopsregistrytp.azurecr.io/backend:latest
 
       - name: Deploy Backend
         run: |
@@ -95,6 +95,16 @@ jobs:
           echo "BACKEND_IP=$BACKEND_IP" >> $GITHUB_ENV
           echo "Backend levantado en: http://$BACKEND_IP:10000"
 
+      - name: Build & Push Frontend image with build args
+        run: |
+          docker build \
+            --build-arg NEXT_PUBLIC_API_URL=http://${BACKEND_IP}:10000/ \
+            --build-arg NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL} \
+            --build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY} \
+            -t devopsregistrytp.azurecr.io/frontend:latest ./frontend
+
+          docker push devopsregistrytp.azurecr.io/frontend:latest
+
       - name: Deploy Frontend
         run: |
           az container delete --resource-group tp-devops --name frontend --yes || true
@@ -109,8 +119,4 @@ jobs:
             --registry-login-server devopsregistrytp.azurecr.io \
             --registry-username devopsregistrytp \
             --registry-password R4vrzbA7fAuzv8L1jcFqIEorWmW/DnPUEh2bzet+95+ACRDKleJv \
-            --restart always \
-            --environment-variables \
-              NEXT_PUBLIC_API_URL=http://${BACKEND_IP}:10000/ \
-              NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL} \
-              NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
+            --restart always
