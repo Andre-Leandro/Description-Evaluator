@@ -111,6 +111,6 @@ jobs:
             --registry-password R4vrzbA7fAuzv8L1jcFqIEorWmW/DnPUEh2bzet+95+ACRDKleJv \
             --restart always \
             --environment-variables \
-              NEXT_PUBLIC_API_URL=http://${BACKEND_IP}:10000 \
+              NEXT_PUBLIC_API_URL=http://${BACKEND_IP}:10000/ \
               NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL} \
               NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
