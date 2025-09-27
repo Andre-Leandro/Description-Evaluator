@@ -59,14 +59,16 @@ jobs:
           az container create \
             --resource-group tp-devops \
             --name redis \
-            --image redis:7-alpine \
+            --image mcr.microsoft.com/oss/bitnami/redis:7.0 \
             --cpu 0.5 --memory 0.5 \
             --os-type Linux \
             --ports 6379 \
             --ip-address public \
             --dns-name-label redis-tp-devops \
             --restart always \
-            --command-line "redis-server --requirepass myredispassword123 --appendonly yes"
+            --environment-variables \
+              REDIS_PASSWORD=myredispassword123 \
+              REDIS_AOF_ENABLED=yes
 
       - name: Get Redis IP
         id: get-redis-ip
