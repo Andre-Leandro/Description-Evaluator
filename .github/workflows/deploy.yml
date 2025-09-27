@@ -53,22 +53,29 @@ jobs:
           echo "NEXT_PUBLIC_SUPABASE_URL=https://illglqdcmfjqktkyxhhh.supabase.co" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_GvcxsZEZvkvsrDj6qhlbkw_2Gb8sFF6" >> $GITHUB_ENV
 
+      - name: Pull and Push Redis to ACR (fallback)
+        run: |
+          docker pull redis:alpine
+          docker tag redis:alpine devopsregistrytp.azurecr.io/redis:alpine
+          docker push devopsregistrytp.azurecr.io/redis:alpine
+
       - name: Deploy Redis Container
         run: |
           az container delete --resource-group tp-devops --name redis --yes || true
           az container create \
             --resource-group tp-devops \
             --name redis \
-            --image mcr.microsoft.com/oss/bitnami/redis:7.0 \
+            --image devopsregistrytp.azurecr.io/redis:alpine \
             --cpu 0.5 --memory 0.5 \
             --os-type Linux \
             --ports 6379 \
             --ip-address public \
             --dns-name-label redis-tp-devops \
+            --registry-login-server devopsregistrytp.azurecr.io \
+            --registry-username devopsregistrytp \
+            --registry-password R4vrzbA7fAuzv8L1jcFqIEorWmW/DnPUEh2bzet+95+ACRDKleJv \
             --restart always \
-            --environment-variables \
-              REDIS_PASSWORD=myredispassword123 \
-              REDIS_AOF_ENABLED=yes
+            --command-line "redis-server --requirepass myredispassword123 --appendonly yes"
 
       - name: Get Redis IP
         id: get-redis-ip
