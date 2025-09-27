@@ -17,15 +17,20 @@ product_routes = Blueprint('products', __name__)
 @product_routes.route('/products', methods=['GET'])
 def get_products():
     try:
-        
+        # Intentar obtener del cache
         if redis_client.exists('products'):
+            print('📦 Serving from Redis cache')
             products = redis_client.get('products')
             products = json.loads(products)
             return jsonify({"products": products})
         
+        # Si no está en cache, obtener de DB
+        print('🔄 Fetching from database')
         products = ProductService.get_all_products()
         
-        redis_client.set('products', json.dumps(products))
+        # Guardar en cache con TTL de 5 minutos (300 segundos)
+        redis_client.setex('products', 300, json.dumps(products))
+        print('✅ Data cached for 5 minutes')
         
         return jsonify({"products": products})
     except Exception as e:
@@ -90,6 +95,14 @@ def register_vote():
         
         if result is None:
             return jsonify({"error": "Product not found"}), 404
+        
+        # 🔥 CACHE INVALIDATION: Eliminar cache cuando hay cambios
+        try:
+            redis_client.delete('products')
+            print("✅ Cache invalidated after vote")
+        except Exception as redis_error:
+            print(f"⚠️ Could not invalidate cache: {redis_error}")
+            # No fallar si Redis falla, solo log
             
         return jsonify({
             "message": "Vote registered successfully",

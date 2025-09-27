@@ -48,11 +48,37 @@ jobs:
           echo "db_host=${{ secrets.DB_HOST }}" >> $GITHUB_ENV
           echo "db_port=${{ secrets.DB_PORT }}" >> $GITHUB_ENV
           echo "db_name=${{ secrets.DB_NAME }}" >> $GITHUB_ENV
-          echo "REDIS_HOST=redis-17428.c56.east-us.azure.redns.redis-cloud.com" >> $GITHUB_ENV
-          echo "REDIS_PORT=17428" >> $GITHUB_ENV
-          echo "REDIS_PASSWORD=iqaLW1kalNrUmpx7LdlQA0RQ1bVpIeYe" >> $GITHUB_ENV
+          echo "REDIS_PORT=6379" >> $GITHUB_ENV
+          echo "REDIS_PASSWORD=myredispassword123" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_SUPABASE_URL=https://illglqdcmfjqktkyxhhh.supabase.co" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_GvcxsZEZvkvsrDj6qhlbkw_2Gb8sFF6" >> $GITHUB_ENV
+
+      - name: Deploy Redis Container
+        run: |
+          az container delete --resource-group tp-devops --name redis --yes || true
+          az container create \
+            --resource-group tp-devops \
+            --name redis \
+            --image redis:7-alpine \
+            --cpu 0.5 --memory 0.5 \
+            --os-type Linux \
+            --ports 6379 \
+            --ip-address public \
+            --dns-name-label redis-tp-devops \
+            --restart always \
+            --command-line "redis-server --requirepass myredispassword123 --appendonly yes"
+
+      - name: Get Redis IP
+        id: get-redis-ip
+        run: |
+          sleep 30  # Esperar que Redis esté listo
+          REDIS_IP=$(az container show \
+            --resource-group tp-devops \
+            --name redis \
+            --query ipAddress.ip \
+            -o tsv)
+          echo "REDIS_IP=$REDIS_IP" >> $GITHUB_ENV
+          echo "Redis desplegado en: $REDIS_IP:6379"
 
       - name: Build & Push Backend image
         run: |
@@ -81,7 +107,7 @@ jobs:
               host=${db_host} \
               port=${db_port} \
               dbname=${db_name} \
-              REDIS_HOST=${REDIS_HOST} \
+              REDIS_HOST=${REDIS_IP} \
               REDIS_PORT=${REDIS_PORT} \
               REDIS_PASSWORD=${REDIS_PASSWORD}
 
