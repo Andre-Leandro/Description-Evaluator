@@ -27,6 +27,23 @@ export default function DescriptionVoting() {
     return data.publicUrl;
   };
   
+  // Helper function to check if product is evaluated for specific condition
+  const isProductEvaluatedForCondition = (product, conditionId) => {
+    if (!product.evaluations || !product.evaluations.length) return false;
+    return product.evaluations.some(evaluation => 
+      evaluation.condition?.id === conditionId && evaluation.evaluated === true
+    );
+  };
+
+  // Helper function to get the voted model for a product and condition
+  const getVotedModelForProduct = (product, conditionId) => {
+    if (!product.evaluations || !product.evaluations.length) return null;
+    const evaluation = product.evaluations.find(evaluation => 
+      evaluation.condition?.id === conditionId && evaluation.evaluated === true
+    );
+    return evaluation?.model || null;
+  };
+  
 
 
   const handleVote = async (modelName, modelId) => {
@@ -177,9 +194,9 @@ export default function DescriptionVoting() {
 
     // Finalmente aplicamos el filtro de estado (evaluated/pending)
     if (filter === "evaluated") {
-      filtered = filtered.filter((p) => p.evaluated);
+      filtered = filtered.filter((p) => isProductEvaluatedForCondition(p, selectedCondition));
     } else if (filter === "pending") {
-      filtered = filtered.filter((p) => !p.evaluated);
+      filtered = filtered.filter((p) => !isProductEvaluatedForCondition(p, selectedCondition));
     }
     
     return filtered;
@@ -343,7 +360,8 @@ export default function DescriptionVoting() {
         <div className="p-4">
           <div className="grid grid-cols-5 gap-2">
             {productsByPart.map((product, idx) => {
-              const isAnswered = votes.some(v => v.productId === product.id);
+              const isAnswered = votes.some(v => v.productId === product.id && v.conditionId === selectedCondition) || 
+                                isProductEvaluatedForCondition(product, selectedCondition);
               const isSkipped = skipped.some(s => s.productId === product.id);
               const isCurrent = idx === index;
               
@@ -398,12 +416,12 @@ export default function DescriptionVoting() {
         {/* Estado evaluado/pendiente */}
         <span
           className={`text-xs sm:text-sm font-semibold px-3 py-1 rounded-full ${
-            currentProduct.evaluated
+            isProductEvaluatedForCondition(currentProduct, selectedCondition)
               ? "bg-green-50 text-green-700 border border-green-100"
               : "bg-yellow-50 text-yellow-700 border border-yellow-100"
           }`}
         >
-          {currentProduct.evaluated ? "✓ Evaluado" : "⏳ Pendiente"}
+          {isProductEvaluatedForCondition(currentProduct, selectedCondition) ? "✓ Evaluado" : "⏳ Pendiente"}
         </span>
       </div>
 
@@ -422,20 +440,63 @@ export default function DescriptionVoting() {
     </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {randomizedOptions.map((desc, i) => (
-                <div
-                  key={i}
-                  onClick={() => handleVote(desc.model, desc.model.id)}
-                  className="cursor-pointer border rounded-xl p-4 hover:bg-gray-50 transition text-sm sm:text-base bg-white"
-                >
-                  <p className="text-gray-800">{desc.generated_description}</p>
-                </div>
-              ))}
+              {randomizedOptions.map((desc, i) => {
+                const votedModel = getVotedModelForProduct(currentProduct, selectedCondition);
+                const isVoted = votedModel && votedModel.name === desc.model?.name;
+                
+                return (
+                  <div
+                    key={i}
+                    onClick={() => handleVote(desc.model?.name, desc.model?.id)}
+                    className={`cursor-pointer border rounded-xl p-4 hover:bg-gray-50 transition text-sm sm:text-base ${
+                      isVoted 
+                        ? "bg-gray-100 border-gray-300 shadow-md" // Darker/shadowed appearance for voted option
+                        : "bg-white"
+                    }`}
+                  >
+                    <p className={`${isVoted ? "text-gray-700 font-medium" : "text-gray-800"}`}>
+                      {desc.generated_description}
+                    </p>
+                    {isVoted && (
+                      <div className="mt-2 flex items-center text-xs text-green-600">
+                        <span className="mr-1">✓</span>
+                        <span>Opción votada</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
               <div 
                 onClick={() => handleVote("Todas bien", 0)}
-                className="cursor-pointer border rounded-xl p-4 hover:bg-gray-50 transition text-sm sm:text-base text-center h-full flex items-center justify-center bg-white"
+                className={`cursor-pointer border rounded-xl p-4 hover:bg-gray-50 transition text-sm sm:text-base text-center h-full flex flex-col items-center justify-center ${
+                  (() => {
+                    const votedModel = getVotedModelForProduct(currentProduct, selectedCondition);
+                    const isVoted = votedModel && votedModel.name === "Todas bien";
+                    return isVoted 
+                      ? "bg-gray-100 border-gray-300 shadow-md" // Darker/shadowed appearance for voted option
+                      : "bg-white";
+                  })()
+                }`}
               >
-                <span className="text-gray-700">Todas están bien</span>
+                <span className={`${
+                  (() => {
+                    const votedModel = getVotedModelForProduct(currentProduct, selectedCondition);
+                    const isVoted = votedModel && votedModel.name === "Todas bien";
+                    return isVoted ? "text-gray-700 font-medium" : "text-gray-700";
+                  })()
+                }`}>
+                  Todas están bien
+                </span>
+                {(() => {
+                  const votedModel = getVotedModelForProduct(currentProduct, selectedCondition);
+                  const isVoted = votedModel && votedModel.name === "Todas bien";
+                  return isVoted && (
+                    <div className="mt-2 flex items-center text-xs text-green-600">
+                      <span className="mr-1">✓</span>
+                      <span>Opción votada</span>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           </div>
@@ -446,7 +507,7 @@ export default function DescriptionVoting() {
               onClick={handleSkip}
               className="px-4 py-2 bg-[#5A8CD3] text-white rounded-xl hover:bg-[#4A90E2] transition font-semibold"
             >
-               Saltar pregunta
+               Saltar producto
             </button>
           </div>
         </>

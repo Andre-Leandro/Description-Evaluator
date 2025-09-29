@@ -11,9 +11,8 @@ export default function Home() {
               Smart<span className="text-[#5A8CD3]">Catalog</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Herramienta profesional para evaluar, comparar y optimizar
-              descripciones de productos. Mejora la calidad de tu contenido con
-              análisis inteligente y comparaciones detalladas.
+              Herramienta profesional para evaluar, comparar y optimizar el contenido de tus productos: títulos, descripciones y metadescripciones.
+              Potencia la visibilidad y calidad de tu catálogo con análisis inteligente y resultados precisos.
             </p>
             <div className="flex justify-center items-center space-x-4 text-sm text-gray-500">
               <span className="flex items-center">

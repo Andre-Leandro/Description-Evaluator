@@ -63,28 +63,38 @@ export default function Sidebar() {
 
   return (
     <div className={`h-screen flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-68'}`}>
-      <div className="p-4 flex items-center justify-between border-b border-gray-200">
+      <div className="p-4 flex border-b border-gray-200">
         {!isCollapsed ? (
-          <div className="flex items-center space-x-1">
-          <img
-            src="/logo.png"
-            alt="Logo"
-            width={75}
-            height={75}
-            className="rounded-full"
-          />
-          <h2 className="text-lg font-bold text-gray-900 leading-tight"> SmartCatalog</h2>
-           </div>
+          <>
+            <div className="flex items-center space-x-2 flex-grow min-w-0">
+              <img
+                src="/logo.png"
+                alt="Logo"
+                width={50}
+                height={48}
+                className="rounded-full flex-shrink-0"
+              />
+              <h2 className="text-lg font-bold text-gray-900 pl-2 leading-tight truncate">SmartCatalog</h2>
+            </div>
+            <button
+              onClick={toggleSidebar}
+              className="ml-auto p-1 rounded-md hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors flex-shrink-0"
+            >
+              <X size={20} />
+            </button>
+          </>
         ) : (
-          <div className="w-6"></div>
+          <>
+            <div className="w-6"></div>
+            <button
+              onClick={toggleSidebar}
+              className="ml-auto p-1 rounded-md hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors flex-shrink-0"
+              aria-label="Expandir menú"
+            >
+              <Menu size={18} />
+            </button>
+          </>
         )}
-        <button
-          onClick={toggleSidebar}
-          className="p-2 rounded-md hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
-          aria-label={isCollapsed ? 'Expandir menú' : 'Contraer menú'}
-        >
-          {isCollapsed ? <Menu size={20} /> : <X size={20} />}
-        </button>
       </div>
       <nav className="flex-1 overflow-hidden hover:overflow-y-auto">
         <ul className="space-y-1 p-2 pr-1">
