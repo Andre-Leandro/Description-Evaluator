@@ -48,13 +48,3 @@ jobs:
 
       - name: Run backend tests
         run: pytest test_api.py
-
-  deploy-render:
-    needs: test-backend
-    runs-on: ubuntu-latest
-    if: success() # Solo si los tests pasan
-    steps:
-      - name: Deploy to Render
-        run: |
-          curl -X POST "https://api.render.com/v1/services/<SERVICE_ID>/deploys" \
-          -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
