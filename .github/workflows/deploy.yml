@@ -48,8 +48,10 @@ jobs:
           echo "db_host=${{ secrets.DB_HOST }}" >> $GITHUB_ENV
           echo "db_port=${{ secrets.DB_PORT }}" >> $GITHUB_ENV
           echo "db_name=${{ secrets.DB_NAME }}" >> $GITHUB_ENV
+          echo "REDIS_HOST=redis-tp-devops.eastus.azurecontainer.io" >> $GITHUB_ENV
           echo "REDIS_PORT=6379" >> $GITHUB_ENV
           echo "REDIS_PASSWORD=myredispassword123" >> $GITHUB_ENV
+          echo "BACKEND_URL=http://backend-tp-devops.eastus.azurecontainer.io:10000" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_SUPABASE_URL=https://illglqdcmfjqktkyxhhh.supabase.co" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_GvcxsZEZvkvsrDj6qhlbkw_2Gb8sFF6" >> $GITHUB_ENV
 
@@ -77,17 +79,11 @@ jobs:
             --restart always \
             --command-line "redis-server --requirepass myredispassword123 --appendonly yes"
 
-      - name: Get Redis IP
-        id: get-redis-ip
+      - name: Wait for Redis to be ready
         run: |
-          sleep 30  # Esperar que Redis esté listo
-          REDIS_IP=$(az container show \
-            --resource-group tp-devops \
-            --name redis \
-            --query ipAddress.ip \
-            -o tsv)
-          echo "REDIS_IP=$REDIS_IP" >> $GITHUB_ENV
-          echo "Redis desplegado en: $REDIS_IP:6379"
+          echo "Esperando que Redis esté listo..."
+          sleep 30
+          echo "✅ Redis desplegado en: redis-tp-devops.eastus.azurecontainer.io:6379"
 
       - name: Build & Push Backend image
         run: |
@@ -116,25 +112,20 @@ jobs:
               host=${db_host} \
               port=${db_port} \
               dbname=${db_name} \
-              REDIS_HOST=${REDIS_IP} \
+              REDIS_HOST=${REDIS_HOST} \
               REDIS_PORT=${REDIS_PORT} \
               REDIS_PASSWORD=${REDIS_PASSWORD}
 
-      - name: Get Backend Public IP
-        id: get-backend-ip
+      - name: Wait for Backend to be ready
         run: |
-          BACKEND_IP=$(az container show \
-            --resource-group tp-devops \
-            --name backend \
-            --query ipAddress.ip \
-            -o tsv)
-          echo "BACKEND_IP=$BACKEND_IP" >> $GITHUB_ENV
-          echo "Backend levantado en: http://$BACKEND_IP:10000"
+          echo "Esperando que Backend esté listo..."
+          sleep 30
+          echo "✅ Backend desplegado en: ${BACKEND_URL}"
 
       - name: Build & Push Frontend image with build args
         run: |
           docker build \
-            --build-arg NEXT_PUBLIC_API_URL=http://${BACKEND_IP}:10000/ \
+            --build-arg NEXT_PUBLIC_API_URL=${BACKEND_URL}/ \
             --build-arg NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL} \
             --build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY} \
             -t devopsregistrytp.azurecr.io/frontend:latest ./frontend
@@ -158,6 +149,22 @@ jobs:
             --registry-password R4vrzbA7fAuzv8L1jcFqIEorWmW/DnPUEh2bzet+95+ACRDKleJv \
             --restart always \
             --environment-variables \
-              NEXT_PUBLIC_API_URL=http://${BACKEND_IP}:10000 \
+              NEXT_PUBLIC_API_URL=${BACKEND_URL} \
               NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL} \
               NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
+
+      - name: Deployment Summary
+        run: |
+          echo "🎉 ¡Deployment completado exitosamente!"
+          echo ""
+          echo "📋 URLs de los servicios:"
+          echo "🔴 Redis:    redis-tp-devops.eastus.azurecontainer.io:6379"
+          echo "🟡 Backend:  backend-tp-devops.eastus.azurecontainer.io:10000"
+          echo "🟢 Frontend: frontend-tp-devops.eastus.azurecontainer.io"
+          echo ""
+          echo "🧪 Probar la app:"
+          echo "   http://frontend-tp-devops.eastus.azurecontainer.io"
+          echo "   http://frontend-tp-devops.eastus.azurecontainer.io/comparacion"
+          echo ""
+          echo "🔗 Conectar a Redis:"
+          echo "   redis-cli -h redis-tp-devops.eastus.azurecontainer.io -p 6379 -a myredispassword123"
