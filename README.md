@@ -1,4 +1,4 @@
-# Description Evaluator 📊
+# SmartCatalog
 
 Una aplicación web moderna para evaluar y analizar descripciones utilizando tecnologías de vanguardia y arquitectura containerizada.
 
@@ -28,7 +28,6 @@ Este proyecto implementa una arquitectura de microservicios completa con:
 
 - **Python** - Lenguaje de programación principal
 - **Redis** - Base de datos en memoria para cacheo
-- **Jupyter Notebook** - Para análisis y prototipado
 
 ### DevOps
 
@@ -48,7 +47,6 @@ Description-Evaluator/
 ├── .env.example               # Variables de entorno de ejemplo
 ├── .gitignore                 # Archivos ignorados por Git
 ├── docker-compose.yml         # Configuración de Docker Compose
-├── TP1-AppWebRedisContenerizados-DevOps-UTN-2025.pdf  # Documentación del proyecto
 └── README.md                  # Este archivo
 ```
 
@@ -123,7 +121,7 @@ python app.py
 
 La aplicación está desplegada en Azure Container Instances y disponible en las siguientes URLs:
 
-### 🌐 Enlaces de Producción
+### Enlaces de Producción
 
 - **💻 Frontend (Aplicación Principal)**:
 
@@ -145,12 +143,3 @@ Para conectarte al Redis desplegado desde tu terminal:
 # Conectar usando redis-cli
 redis-cli -h redis-tp-devops.eastus.azurecontainer.io -p 6379 -a $REDIS_PASSWORD
 ```
-
-## Características Principales
-
-- **Evaluación Inteligente**: Análisis avanzado de descripciones de texto
-- **Interfaz Moderna**: UI/UX responsive con Next.js y Tailwind CSS
-- **Visualización de Datos**: Gráficos interactivos con Recharts
-- **Cacheo Eficiente**: Redis para optimización de rendimiento
-- **Arquitectura Escalable**: Microservicios containerizados
-- **Integración Cloud**: Supabase para funcionalidades adicionales
