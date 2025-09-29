@@ -6,4 +6,6 @@ sqlalchemy
 psycopg2
 redis
 python-dotenv
+pytest
+requests
 

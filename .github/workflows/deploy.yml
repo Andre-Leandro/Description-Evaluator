@@ -1,0 +1,170 @@
+name: Build, Push and Deploy to Azure
+
+on:
+  push:
+    branches: ["docker"]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Login en ACR (para docker build/push)
+      - name: Log in to ACR
+        uses: azure/docker-login@v1
+        with:
+          login-server: devopsregistrytp.azurecr.io
+          username: devopsregistrytp
+          password: R4vrzbA7fAuzv8L1jcFqIEorWmW/DnPUEh2bzet+95+ACRDKleJv
+
+      # Login a Azure con el SP
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: |
+            {
+              "clientId": "9f50ed35-218d-4af0-922f-12bde1825ef7",
+              "clientSecret": "UOU8Q~UUxDOOP49NtOsQyCmKpSR.L~j4_tUW8cIG",
+              "subscriptionId": "811d5445-f311-40c1-be02-5f92a5819ee2",
+              "tenantId": "35e9cd03-43d0-4947-b582-a6965c4cb674",
+              "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
+              "resourceManagerEndpointUrl": "https://management.azure.com/",
+              "activeDirectoryGraphResourceId": "https://graph.windows.net/",
+              "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
+              "galleryEndpointUrl": "https://gallery.azure.com/",
+              "managementEndpointUrl": "https://management.core.windows.net/"
+            }
+
+      - name: Export environment variables
+        run: |
+          echo "db_user=${{ secrets.DB_USER }}" >> $GITHUB_ENV
+          echo "db_password=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
+          echo "db_host=${{ secrets.DB_HOST }}" >> $GITHUB_ENV
+          echo "db_port=${{ secrets.DB_PORT }}" >> $GITHUB_ENV
+          echo "db_name=${{ secrets.DB_NAME }}" >> $GITHUB_ENV
+          echo "REDIS_HOST=redis-tp-devops.eastus.azurecontainer.io" >> $GITHUB_ENV
+          echo "REDIS_PORT=6379" >> $GITHUB_ENV
+          echo "REDIS_PASSWORD=myredispassword123" >> $GITHUB_ENV
+          echo "BACKEND_URL=http://backend-tp-devops.eastus.azurecontainer.io:10000" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_SUPABASE_URL=https://illglqdcmfjqktkyxhhh.supabase.co" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_GvcxsZEZvkvsrDj6qhlbkw_2Gb8sFF6" >> $GITHUB_ENV
+
+      - name: Pull and Push Redis to ACR (fallback)
+        run: |
+          docker pull redis:alpine
+          docker tag redis:alpine devopsregistrytp.azurecr.io/redis:alpine
+          docker push devopsregistrytp.azurecr.io/redis:alpine
+
+      - name: Deploy Redis Container
+        run: |
+          az container delete --resource-group tp-devops --name redis --yes || true
+          az container create \
+            --resource-group tp-devops \
+            --name redis \
+            --image devopsregistrytp.azurecr.io/redis:alpine \
+            --cpu 0.5 --memory 0.5 \
+            --os-type Linux \
+            --ports 6379 \
+            --ip-address public \
+            --dns-name-label redis-tp-devops \
+            --registry-login-server devopsregistrytp.azurecr.io \
+            --registry-username devopsregistrytp \
+            --registry-password R4vrzbA7fAuzv8L1jcFqIEorWmW/DnPUEh2bzet+95+ACRDKleJv \
+            --restart always \
+            --command-line "redis-server --requirepass myredispassword123 --appendonly yes"
+
+      - name: Wait for Redis to be ready
+        run: |
+          echo "Esperando que Redis esté listo..."
+          sleep 30
+          echo "✅ Redis desplegado en: redis-tp-devops.eastus.azurecontainer.io:6379"
+
+      - name: Build & Push Backend image
+        run: |
+          docker build -t devopsregistrytp.azurecr.io/backend:latest ./backend
+          docker push devopsregistrytp.azurecr.io/backend:latest
+
+      - name: Deploy Backend
+        run: |
+          az container delete --resource-group tp-devops --name backend --yes || true
+          az container create \
+            --resource-group tp-devops \
+            --name backend \
+            --image devopsregistrytp.azurecr.io/backend:latest \
+            --cpu 1 --memory 1 \
+            --os-type Linux \
+            --ports 10000 \
+            --ip-address public \
+            --dns-name-label backend-tp-devops \
+            --registry-login-server devopsregistrytp.azurecr.io \
+            --registry-username devopsregistrytp \
+            --registry-password R4vrzbA7fAuzv8L1jcFqIEorWmW/DnPUEh2bzet+95+ACRDKleJv \
+            --restart always \
+            --environment-variables \
+              user=${db_user} \
+              password=${db_password} \
+              host=${db_host} \
+              port=${db_port} \
+              dbname=${db_name} \
+              REDIS_HOST=${REDIS_HOST} \
+              REDIS_PORT=${REDIS_PORT} \
+              REDIS_PASSWORD=${REDIS_PASSWORD}
+
+      - name: Wait for Backend to be ready
+        run: |
+          echo "Esperando que Backend esté listo..."
+          sleep 30
+          echo "✅ Backend desplegado en: ${BACKEND_URL}"
+
+      - name: Build & Push Frontend image with build args
+        run: |
+          docker build \
+            --build-arg NEXT_PUBLIC_API_URL=${BACKEND_URL}/ \
+            --build-arg NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL} \
+            --build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY} \
+            -t devopsregistrytp.azurecr.io/frontend:latest ./frontend
+
+          docker push devopsregistrytp.azurecr.io/frontend:latest
+
+      - name: Deploy Frontend
+        run: |
+          az container delete --resource-group tp-devops --name frontend --yes || true
+          az container create \
+            --resource-group tp-devops \
+            --name frontend \
+            --image devopsregistrytp.azurecr.io/frontend:latest \
+            --cpu 1 --memory 1 \
+            --os-type Linux \
+            --ports 80 \
+            --ip-address public \
+            --dns-name-label frontend-tp-devops \
+            --registry-login-server devopsregistrytp.azurecr.io \
+            --registry-username devopsregistrytp \
+            --registry-password R4vrzbA7fAuzv8L1jcFqIEorWmW/DnPUEh2bzet+95+ACRDKleJv \
+            --restart always \
+            --environment-variables \
+              NEXT_PUBLIC_API_URL=${BACKEND_URL} \
+              NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL} \
+              NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
+
+      - name: Deployment Summary
+        run: |
+          echo "🎉 ¡Deployment completado exitosamente!"
+          echo ""
+          echo "📋 URLs de los servicios:"
+          echo "🔴 Redis:    redis-tp-devops.eastus.azurecontainer.io:6379"
+          echo "🟡 Backend:  backend-tp-devops.eastus.azurecontainer.io:10000"
+          echo "🟢 Frontend: frontend-tp-devops.eastus.azurecontainer.io"
+          echo ""
+          echo "🧪 Probar la app:"
+          echo "   http://frontend-tp-devops.eastus.azurecontainer.io"
+          echo "   http://frontend-tp-devops.eastus.azurecontainer.io/comparacion"
+          echo ""
+          echo "🔗 Conectar a Redis:"
+          echo "   redis-cli -h redis-tp-devops.eastus.azurecontainer.io -p 6379 -a myredispassword123"

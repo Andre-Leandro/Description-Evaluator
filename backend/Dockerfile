@@ -8,7 +8,7 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     FLASK_APP=main.py \
-    FLASK_ENV=development \
+    FLASK_ENV=production \
     FLASK_DEBUG=0
 
 # Instalar dependencias del sistema
