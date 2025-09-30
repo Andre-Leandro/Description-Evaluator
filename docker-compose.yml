@@ -35,6 +35,6 @@ services:
     image: devopsregistrytp.azurecr.io/frontend:latest  # <- Tag correcto para push
     container_name: frontend
     ports:
-      - "3000:3000"
+      - "80:80"
     depends_on:
       - backend
