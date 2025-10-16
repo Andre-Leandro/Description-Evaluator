@@ -1,29 +1,16 @@
 services:
-  redis:
-    image: redis:latest
-    container_name: redis
-    ports:
-      - "6379:6379"
-    environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
-
   backend:
     build: ./backend
     image: devopsregistrytp.azurecr.io/backend:latest  # <- Tag correcto para push
     container_name: backend
     ports:
       - "10000:10000"
-    depends_on:
-      - redis
     environment:
       - user=${db_user}
       - password=${db_password}
       - host=${db_host}
       - port=${db_port}
       - dbname=${db_name}
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
 
   frontend:
     build:
