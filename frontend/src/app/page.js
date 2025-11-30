@@ -1,4 +1,5 @@
 import Link from "next/link";
+import HADemo from "@/components/HADemo";
 
 export default function Home() {
   return (
@@ -208,6 +209,11 @@ export default function Home() {
                 />
               </svg>
             </Link>
+          </div>
+
+          {/* High Availability Demo Section - KUBERNETES */}
+          <div className="mb-8">
+            <HADemo />
           </div>
 
           {/* Stats or Benefits */}

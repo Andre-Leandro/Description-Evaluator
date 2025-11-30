@@ -4,7 +4,32 @@ Demo completa de orquestación Kubernetes con k3d mostrando alta disponibilidad 
 
 ---
 
-## 📋 GUIÓN DE LA DEMO
+## 🚀 DEMO RÁPIDA (RECOMENDADA PARA PRESENTACIONES)
+
+La forma más visual de demostrar la alta disponibilidad es usando el **botón web integrado**:
+
+1. **Ejecuta el script rápido:**
+   ```bash
+   cd k8s
+   ./demo-quick.sh
+   ```
+
+2. **El script abrirá automáticamente:**
+   - Una terminal con `kubectl get pods -n description-evaluator -w`
+   - Tu navegador en `http://localhost:8080`
+
+3. **En la página principal verás un panel naranja:**
+   - "🎯 Demo de Alta Disponibilidad (Kubernetes)"
+   - Haz clic en el botón: **💣 Saturar Memoria del Pod**
+
+4. **Observa en tiempo real:**
+   - **Terminal:** Un pod pasa de Running → OOMKilled → Terminating, y un nuevo pod se crea
+   - **Navegador:** La app sigue funcionando sin errores (los otros 2 pods responden)
+   - **Resultado:** Alta disponibilidad demostrada visualmente 🎉
+
+---
+
+## 📋 GUIÓN DE LA DEMO (PASO A PASO COMPLETO)
 
 ### **PASO 0: Limpieza Total** 🧹
 

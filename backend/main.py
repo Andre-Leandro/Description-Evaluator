@@ -27,7 +27,12 @@ def home():
 @app.route('/health')
 def health():
     """Health check endpoint para Kubernetes"""
-    return {"status": "healthy", "service": "backend"}, 200
+    import socket
+    return {
+        "status": "healthy", 
+        "service": "backend",
+        "pod": socket.gethostname()
+    }, 200
 
 @app.route('/stress-memory')
 def stress_memory():
