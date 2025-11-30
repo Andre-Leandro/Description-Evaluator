@@ -33,6 +33,7 @@ Este proyecto implementa una arquitectura de microservicios completa con:
 
 - **Docker** - Containerización
 - **Docker Compose** - Orquestación de contenedores
+- **Kubernetes (k3s)** - Orquestación de contenedores con alta disponibilidad
 - **GitHub Actions** - CI/CD automatizado
 - **Azure Container Instances** - Hosting en la nube
 - **Azure Container Registry** - Registro de imágenes Docker
@@ -44,6 +45,7 @@ Description-Evaluator/
 ├── .github/                    # Configuración de GitHub Actions
 ├── backend/                    # Aplicación Python
 ├── frontend/                   # Aplicación Next.js
+├── k8s/                        # Manifiestos de Kubernetes (k3s)
 ├── .env.example               # Variables de entorno de ejemplo
 ├── .gitignore                 # Archivos ignorados por Git
 ├── docker-compose.yml         # Configuración de Docker Compose
@@ -58,7 +60,7 @@ Description-Evaluator/
 - Node.js 18+ (para desarrollo local)
 - Python 3.8+ (para desarrollo local)
 
-### Configuración con Docker (Recomendado)
+### Opción 1: Configuración con Docker Compose (Desarrollo)
 
 1. **Clona el repositorio:**
 
@@ -85,7 +87,34 @@ Description-Evaluator/
    - Backend API: `http://localhost:8000`
    - Redis: `localhost:6379`
 
-### Despliegue Automático
+### Opción 2: Kubernetes con k3s (Alta Disponibilidad) 🚀
+
+Para producción con alta disponibilidad, failover automático y escalado:
+
+```bash
+cd k8s
+
+# Ver guía rápida
+cat QUICKSTART.md
+
+# O seguir la documentación completa
+cat README.md
+```
+
+**Características de HA con k3s:**
+- ✅ Múltiples réplicas distribuidas en diferentes nodos
+- ✅ Failover automático cuando un nodo satura memoria (80-100%)
+- ✅ Health checks y auto-recuperación
+- ✅ Escalado automático (HPA)
+- ✅ Balanceo de carga con Ingress
+- ✅ Alta disponibilidad garantizada
+
+**Documentación k8s:**
+- 📖 [`k8s/README.md`](k8s/README.md) - Guía completa de despliegue
+- ⚡ [`k8s/QUICKSTART.md`](k8s/QUICKSTART.md) - Inicio rápido
+- 🏭 [`k8s/PRODUCTION.md`](k8s/PRODUCTION.md) - Configuraciones de producción
+
+### Despliegue Automático (Azure)
 
 El proyecto incluye CI/CD automatizado con GitHub Actions que:
 

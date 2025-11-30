@@ -24,6 +24,27 @@ app.register_blueprint(file_routes)
 def home():
     return "La API está corriendo correctamente."
 
+@app.route('/health')
+def health():
+    """Health check endpoint para Kubernetes"""
+    return {"status": "healthy", "service": "backend"}, 200
+
+@app.route('/stress-memory')
+def stress_memory():
+    """Endpoint para saturar memoria y probar HA en Kubernetes"""
+    import gc
+    memory_hog = []
+    try:
+        # Llenar memoria con datos hasta alcanzar ~400MB
+        for i in range(100):
+            # Crear listas grandes en memoria
+            memory_hog.append([0] * (1024 * 1024))  # ~8MB por iteración
+            if i % 10 == 0:
+                gc.collect()  # Forzar garbage collection
+        return {"status": "memory_saturated", "allocated_mb": len(memory_hog) * 8}, 200
+    except MemoryError:
+        return {"status": "oom", "message": "Out of memory"}, 500
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=port, debug=False)

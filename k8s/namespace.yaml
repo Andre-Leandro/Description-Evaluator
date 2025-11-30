@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: description-evaluator
+  labels:
+    name: description-evaluator
+    app: description-evaluator

@@ -1,0 +1,160 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: description-evaluator
+data:
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  OTEL_SERVICE_NAME: "description-evaluator-backend"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
+---
+# NOTA: El Secret 'backend-secrets' debe crearse manualmente usando el script create-secrets.sh
+# Esto evita exponer credenciales sensibles en el código fuente
+# 
+# Para crear el Secret, ejecuta:
+#   ./create-secrets.sh
+#
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: description-evaluator
+  labels:
+    app: backend
+    tier: application
+spec:
+  replicas: 3  # Múltiples réplicas para alta disponibilidad
+  selector:
+    matchLabels:
+      app: backend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: backend
+        tier: application
+    spec:
+      affinity:
+        # Anti-affinity para distribuir pods en diferentes nodos
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - backend
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: backend
+        image: devopsregistrytp.azurecr.io/backend:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 10000
+          name: flask
+        - containerPort: 8000
+          name: metrics
+        env:
+        - name: user
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: DB_USER
+        - name: password
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: DB_PASSWORD
+        - name: host
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: DB_HOST
+        - name: port
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: DB_PORT
+        - name: dbname
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: DB_NAME
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: REDIS_HOST
+        - name: REDIS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: REDIS_PORT
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: REDIS_PASSWORD
+        - name: OTEL_SERVICE_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: OTEL_SERVICE_NAME
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: OTEL_EXPORTER_OTLP_ENDPOINT
+        resources:
+          requests:
+            memory: "256Mi"  # Memoria base requerida
+            cpu: "200m"
+          limits:
+            memory: "512Mi"  # Límite para forzar evicción al saturar
+            cpu: "500m"
+        # livenessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: 10000
+        #   initialDelaySeconds: 30
+        #   periodSeconds: 10
+        #   timeoutSeconds: 5
+        #   failureThreshold: 3
+        # readinessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: 10000
+        #   initialDelaySeconds: 10
+        #   periodSeconds: 5
+        #   timeoutSeconds: 3
+        #   failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: description-evaluator
+  labels:
+    app: backend
+spec:
+  type: NodePort
+  ports:
+  - port: 10000
+    targetPort: 10000
+    nodePort: 30000
+    protocol: TCP
+    name: flask
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+    name: metrics
+  selector:
+    app: backend

@@ -1,0 +1,87 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-api-prefix
+  namespace: description-evaluator
+spec:
+  stripPrefix:
+    prefixes:
+      - /api
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: description-evaluator-ingress
+  namespace: description-evaluator
+  annotations:
+    kubernetes.io/ingress.class: "traefik"  # k3s usa Traefik por defecto
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.middlewares: description-evaluator-strip-api-prefix@kubernetescrd
+spec:
+  rules:
+  - host: description-evaluator.local  # Puedes cambiar esto por tu dominio
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: backend
+            port:
+              number: 10000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80
+---
+# Ingress alternativo para acceso directo sin hostname
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: description-evaluator-ingress-default
+  namespace: description-evaluator
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+    traefik.ingress.kubernetes.io/router.middlewares: description-evaluator-strip-api-prefix@kubernetescrd
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: backend
+            port:
+              number: 10000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80
+---
+# Ingress para backend directo en puerto 10000 (sin prefix /api)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-direct-ingress
+  namespace: description-evaluator
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+    traefik.ingress.kubernetes.io/router.entrypoints: "traefik"  # Puerto 10000
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: backend
+            port:
+              number: 10000
