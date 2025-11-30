@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from routes.product_routes import product_routes
 from routes.file_routes import file_routes
+from telemetry import setup_opentelemetry
 
 load_dotenv()
 
@@ -11,6 +12,9 @@ port = int(os.environ.get("PORT", 10000))  # 10000 es el valor por defecto si no
 
 app = Flask(__name__)
 CORS(app)
+
+# Setup OpenTelemetry instrumentation
+setup_opentelemetry(app)
 
 # Register blueprints
 app.register_blueprint(product_routes)

@@ -1,0 +1,32 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Scrape backend Flask app metrics directly
+  - job_name: 'backend'
+    static_configs:
+      - targets: ['backend:8000']
+        labels:
+          service: 'description-evaluator-backend'
+  
+  # Scrape metrics from OpenTelemetry Collector
+  - job_name: 'otel-collector'
+    static_configs:
+      - targets: ['otel-collector:8889']
+        labels:
+          service: 'otel-collector'
+  
+  # Scrape cAdvisor for container metrics
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+        labels:
+          service: 'cadvisor'
+  
+  # Scrape Redis exporter if available
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          service: 'redis'
