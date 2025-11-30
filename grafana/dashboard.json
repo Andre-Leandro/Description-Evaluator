@@ -384,9 +384,27 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(rate(container_cpu_usage_seconds_total{name=~\"backend|frontend|redis\"}[1m])) by (name) * 100",
-          "legendFormat": "{{name}}",
+          "expr": "label_replace(sum(rate(container_cpu_usage_seconds_total{id=\"/docker/861bbf44f1965537b6071123157497d17d108e91209930f934cb1d63303e937d\"}[1m])) * 100, \"container\", \"frontend\", \"\", \"\")",
+          "legendFormat": "{{container}}",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "label_replace(sum(rate(container_cpu_usage_seconds_total{id=\"/docker/b11379106d402a4fd775b008b4c0402853ffb532e8e6e5f61222419aac3b9bb5\"}[1m])) * 100, \"container\", \"backend\", \"\", \"\")",
+          "legendFormat": "{{container}}",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "label_replace(sum(rate(container_cpu_usage_seconds_total{id=\"/docker/767b70f567504c8aef1fb79ac79b89e4569350d199aedd3e331c0295de724ae8\"}[1m])) * 100, \"container\", \"redis\", \"\", \"\")",
+          "legendFormat": "{{container}}",
+          "refId": "C"
         }
       ],
       "title": "🖥️ CPU Usage por Contenedor",
@@ -471,9 +489,27 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "container_memory_usage_bytes{name=~\"backend|frontend|redis\"}",
-          "legendFormat": "{{name}}",
+          "expr": "label_replace(container_memory_usage_bytes{id=\"/docker/861bbf44f1965537b6071123157497d17d108e91209930f934cb1d63303e937d\"}, \"container\", \"frontend\", \"\", \"\")",
+          "legendFormat": "{{container}}",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "label_replace(container_memory_usage_bytes{id=\"/docker/b11379106d402a4fd775b008b4c0402853ffb532e8e6e5f61222419aac3b9bb5\"}, \"container\", \"backend\", \"\", \"\")",
+          "legendFormat": "{{container}}",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "label_replace(container_memory_usage_bytes{id=\"/docker/767b70f567504c8aef1fb79ac79b89e4569350d199aedd3e331c0295de724ae8\"}, \"container\", \"redis\", \"\", \"\")",
+          "legendFormat": "{{container}}",
+          "refId": "C"
         }
       ],
       "title": "💾 Memory Usage por Contenedor",

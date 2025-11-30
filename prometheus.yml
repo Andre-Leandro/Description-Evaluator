@@ -23,6 +23,13 @@ scrape_configs:
       - targets: ['cadvisor:8080']
         labels:
           service: 'cadvisor'
+    metric_relabel_configs:
+      # Extract container name from id label for better readability
+      # Converts id="/docker/hash" to container_name="hash" 
+      - source_labels: [id]
+        regex: '/docker/([a-f0-9]+)'
+        target_label: container_id
+        replacement: '$1'
   
   # Scrape Redis exporter if available
   - job_name: 'redis'

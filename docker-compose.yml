@@ -10,6 +10,9 @@ services:
       - "6379:6379"
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
+    labels:
+      monitoring.name: "redis"
+      monitoring.type: "database"
     networks:
       - app-network
 
@@ -34,6 +37,9 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
       - OTEL_SERVICE_NAME=description-evaluator-backend
+    labels:
+      monitoring.name: "backend"
+      monitoring.type: "application"
     networks:
       - app-network
 
@@ -50,6 +56,9 @@ services:
       - "80:80"
     depends_on:
       - backend
+    labels:
+      monitoring.name: "frontend"
+      monitoring.type: "application"
     networks:
       - app-network
 
@@ -123,6 +132,9 @@ services:
       - /dev/disk/:/dev/disk:ro
     ports:
       - "8080:8080"
+    command:
+      - '--store_container_labels=true'
+      - '--whitelisted_container_labels=monitoring.name,monitoring.type'
     networks:
       - app-network
     restart: unless-stopped
