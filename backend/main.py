@@ -1,25 +1,99 @@
 from flask import Flask
 from flask_cors import CORS
 import os
+import logging
+import json
 from dotenv import load_dotenv
 from routes.product_routes import product_routes
 from routes.file_routes import file_routes
+from routes.devops_routes import devops_routes
+
+# OpenTelemetry imports
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.resources import Resource, SERVICE_NAME
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.instrumentation.redis import RedisInstrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
 
 load_dotenv()
+
+# Configure structured JSON logging
+class JSONFormatter(logging.Formatter):
+    def format(self, record):
+        log_entry = {
+            "timestamp": self.formatTime(record, self.datefmt),
+            "level": record.levelname,
+            "message": record.getMessage(),
+            "logger": record.name,
+            "module": record.module,
+            "function": record.funcName,
+            "line": record.lineno
+        }
+        if record.exc_info:
+            log_entry["exception"] = self.formatException(record.exc_info)
+        return json.dumps(log_entry)
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+handler = logging.StreamHandler()
+handler.setFormatter(JSONFormatter())
+logger.handlers = [handler]
+logger.setLevel(logging.INFO)
+
+# OpenTelemetry configuration
+OTEL_COLLECTOR_ENDPOINT = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://otel-collector:4317")
+SERVICE_NAME_VALUE = os.getenv("OTEL_SERVICE_NAME", "backend-service")
+
+# Setup tracer provider with resource attributes
+resource = Resource(attributes={
+    SERVICE_NAME: SERVICE_NAME_VALUE,
+    "service.version": "1.0.0",
+    "deployment.environment": os.getenv("ENVIRONMENT", "development")
+})
+
+# Initialize tracer provider
+provider = TracerProvider(resource=resource)
+
+# Configure OTLP exporter to send traces to OpenTelemetry Collector
+try:
+    otlp_exporter = OTLPSpanExporter(
+        endpoint=OTEL_COLLECTOR_ENDPOINT,
+        insecure=True
+    )
+    provider.add_span_processor(BatchSpanProcessor(otlp_exporter))
+    logger.info(f"OpenTelemetry configured to export to: {OTEL_COLLECTOR_ENDPOINT}")
+except Exception as e:
+    logger.warning(f"Failed to configure OTLP exporter: {e}. Traces will not be exported.")
+
+trace.set_tracer_provider(provider)
+tracer = trace.get_tracer(__name__)
 
 port = int(os.environ.get("PORT", 10000))  # 10000 es el valor por defecto si no se define PORT
 
 app = Flask(__name__)
 CORS(app)
 
+# Instrument Flask with OpenTelemetry
+FlaskInstrumentor().instrument_app(app)
+RedisInstrumentor().instrument()
+RequestsInstrumentor().instrument()
+
 # Register blueprints
 app.register_blueprint(product_routes)
 app.register_blueprint(file_routes)
+app.register_blueprint(devops_routes)
 
 @app.route('/')
 def home():
-    return "La API está corriendo correctamente."
+    with tracer.start_as_current_span("home_endpoint"):
+        logger.info("Home endpoint accessed")
+        return "La API está corriendo correctamente."
 
 
 if __name__ == '__main__':
+    logger.info(f"Starting Flask application on port {port}")
     app.run(host='0.0.0.0', port=port, debug=False)

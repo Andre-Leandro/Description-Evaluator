@@ -10,10 +10,14 @@ import {
   BarChart2, 
   Upload, 
   Home,
-  Download
+  Download,
+  Flame,
+  Trash2
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:10000';
 
 const navItems = [
   { 
@@ -45,6 +49,7 @@ const navItems = [
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isLoading, setIsLoading] = useState({ crash: false, cache: false });
   const pathname = usePathname();
 
   const toggleSidebar = () => {
@@ -60,6 +65,46 @@ export default function Sidebar() {
       setIsCollapsed(savedState === 'true');
     }
   }, []);
+
+  const handleCrashTest = async () => {
+    if (!confirm('⚠️ Esto va a crashear el backend intencionalmente (OOMKilled). ¿Continuar?')) {
+      return;
+    }
+    setIsLoading(prev => ({ ...prev, crash: true }));
+    try {
+      const response = await fetch(`${API_URL}/api/kill-memory`, {
+        method: 'GET',
+      });
+      const data = await response.json();
+      alert(`🔥 Crash Test iniciado!\n${data.message}`);
+    } catch (error) {
+      alert(`Error: ${error.message}`);
+    } finally {
+      setIsLoading(prev => ({ ...prev, crash: false }));
+    }
+  };
+
+  const handleClearCache = async () => {
+    if (!confirm('¿Vaciar todo el cache de Redis?')) {
+      return;
+    }
+    setIsLoading(prev => ({ ...prev, cache: true }));
+    try {
+      const response = await fetch(`${API_URL}/api/cache`, {
+        method: 'DELETE',
+      });
+      const data = await response.json();
+      if (response.ok) {
+        alert(`✅ ${data.message}`);
+      } else {
+        alert(`❌ Error: ${data.message}`);
+      }
+    } catch (error) {
+      alert(`Error: ${error.message}`);
+    } finally {
+      setIsLoading(prev => ({ ...prev, cache: false }));
+    }
+  };
 
   return (
     <div className={`h-screen flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-68'}`}>
@@ -126,6 +171,57 @@ export default function Sidebar() {
             );
           })}
         </ul>
+        
+        {/* DevOps Control Section */}
+        <div className={`border-t border-gray-200 mt-2 pt-2 px-2 ${isCollapsed ? 'hidden' : ''}`}>
+          <p className="text-xs text-gray-400 uppercase tracking-wider mb-2 px-3">DevOps Tests</p>
+          <button
+            onClick={handleCrashTest}
+            disabled={isLoading.crash}
+            className="w-full flex items-center p-3 rounded-md transition-colors text-red-600 hover:bg-red-50 disabled:opacity-50"
+          >
+            <span className="w-6 flex-shrink-0 flex items-center justify-center">
+              <Flame className="w-5 h-5" />
+            </span>
+            <span className="ml-3">
+              {isLoading.crash ? 'Ejecutando...' : '🔥 Crash Test'}
+            </span>
+          </button>
+          <button
+            onClick={handleClearCache}
+            disabled={isLoading.cache}
+            className="w-full flex items-center p-3 rounded-md transition-colors text-orange-600 hover:bg-orange-50 disabled:opacity-50"
+          >
+            <span className="w-6 flex-shrink-0 flex items-center justify-center">
+              <Trash2 className="w-5 h-5" />
+            </span>
+            <span className="ml-3">
+              {isLoading.cache ? 'Vaciando...' : '🗑️ Vaciar Redis'}
+            </span>
+          </button>
+        </div>
+        
+        {/* Collapsed state DevOps buttons */}
+        {isCollapsed && (
+          <div className="border-t border-gray-200 mt-2 pt-2 px-2">
+            <button
+              onClick={handleCrashTest}
+              disabled={isLoading.crash}
+              className="w-full flex items-center justify-center p-3 rounded-md transition-colors text-red-600 hover:bg-red-50 disabled:opacity-50"
+              title="🔥 Crash Test"
+            >
+              <Flame className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handleClearCache}
+              disabled={isLoading.cache}
+              className="w-full flex items-center justify-center p-3 rounded-md transition-colors text-orange-600 hover:bg-orange-50 disabled:opacity-50"
+              title="🗑️ Vaciar Redis"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          </div>
+        )}
       </nav>
       {!isCollapsed && (
         <div className="p-4 border-t border-gray-200 text-xs text-gray-500 ">

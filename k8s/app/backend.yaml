@@ -1,0 +1,137 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: default
+  labels:
+    app: backend
+spec:
+  replicas: 2  # High Availability requirement
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "10000"
+    spec:
+      containers:
+        - name: backend
+          image: devopsregistrytp.azurecr.io/backend:latest
+          ports:
+            - containerPort: 10000
+              name: http
+          env:
+            # Database connection (Supabase/PostgreSQL)
+            - name: user
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: db_user
+                  optional: true
+            - name: password
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: db_password
+                  optional: true
+            - name: host
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: db_host
+                  optional: true
+            - name: port
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: db_port
+                  optional: true
+            - name: dbname
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: db_name
+                  optional: true
+            # Redis connection
+            - name: REDIS_HOST
+              value: "redis"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: redis_password
+                  optional: true
+            # OpenTelemetry configuration
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector:4317"
+            - name: OTEL_SERVICE_NAME
+              value: "backend-service"
+            - name: ENVIRONMENT
+              value: "kubernetes"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"  # Limit for OOMKilled testing
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 10000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 10000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: default
+  labels:
+    app: backend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 10000
+      targetPort: 10000
+      name: http
+  selector:
+    app: backend
+---
+# Optional: Create secret for database credentials
+# kubectl create secret generic backend-secrets \
+#   --from-literal=db_user=your_user \
+#   --from-literal=db_password=your_password \
+#   --from-literal=db_host=your_host \
+#   --from-literal=db_port=5432 \
+#   --from-literal=db_name=your_db \
+#   --from-literal=redis_password=your_redis_password
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backend-secrets
+  namespace: default
+type: Opaque
+data:
+  # Base64 encoded placeholder values - replace with actual values
+  # echo -n "value" | base64
+  db_user: ""
+  db_password: ""
+  db_host: ""
+  db_port: "NTQzMg=="
+  db_name: ""
+  redis_password: ""
