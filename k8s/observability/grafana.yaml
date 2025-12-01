@@ -9,6 +9,7 @@ data:
     datasources:
       - name: Prometheus
         type: prometheus
+        uid: prometheus
         access: proxy
         url: http://prometheus:9090
         isDefault: true
@@ -18,6 +19,7 @@ data:
       
       - name: Tempo
         type: tempo
+        uid: tempo
         access: proxy
         url: http://tempo:3200
         editable: false
@@ -343,7 +345,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "rate(otel_http_server_request_count_total[1m])",
+              "expr": "flask_http_request_total",
               "legendFormat": "{{http_route}}",
               "refId": "A"
             }
@@ -437,7 +439,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "histogram_quantile(0.95, rate(otel_http_server_duration_milliseconds_bucket[5m]))",
+              "expr": "histogram_quantile(0.95, rate(flask_http_request_duration_seconds_bucket[5m]))",
               "legendFormat": "p95 Latency",
               "refId": "A"
             },
@@ -446,7 +448,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "histogram_quantile(0.50, rate(otel_http_server_duration_milliseconds_bucket[5m]))",
+              "expr": "histogram_quantile(0.50, rate(flask_http_request_duration_seconds_bucket[5m]))",
               "legendFormat": "p50 Latency",
               "refId": "B"
             }
@@ -467,7 +469,7 @@ data:
           },
           "id": 5,
           "options": {
-            "query": ""
+            "showTime": true
           },
           "targets": [
             {
@@ -475,13 +477,14 @@ data:
                 "type": "tempo",
                 "uid": "tempo"
               },
-              "queryType": "traceqlSearch",
+              "queryType": "nativeSearch",
               "refId": "A",
+              "serviceName": "backend-service",
               "limit": 20
             }
           ],
-          "title": "Traces (Tempo)",
-          "type": "traces"
+          "title": "Recent Traces (Tempo)",
+          "type": "table"
         },
         {
           "datasource": {
@@ -543,80 +546,12 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "count(kube_pod_container_status_restarts_total{pod=~\"backend.*\"} > 0) or vector(0)",
-              "legendFormat": "Restarts",
+              "expr": "sum(kube_pod_container_status_restarts_total{container=\"backend\"})",
+              "legendFormat": "Total Restarts",
               "refId": "A"
             }
           ],
           "title": "Pod Restarts (Backend)",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "red",
-                    "value": null
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 1
-                  },
-                  {
-                    "color": "green",
-                    "value": 2
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 4,
-            "w": 6,
-            "x": 6,
-            "y": 26
-          },
-          "id": 7,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "count(kube_pod_status_phase{pod=~\"backend.*\", phase=\"Running\"})",
-              "legendFormat": "Running Pods",
-              "refId": "A"
-            }
-          ],
-          "title": "Running Backend Pods",
           "type": "stat"
         }
       ],

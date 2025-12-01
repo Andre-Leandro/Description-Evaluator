@@ -5,7 +5,7 @@ services:
     ports:
       - "6379:6379"
     environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
 
   backend:
     build: ./backend
@@ -21,9 +21,13 @@ services:
       - host=${db_host}
       - port=${db_port}
       - dbname=${db_name}
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}
+      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-backend-service}
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+      - PORT=${PORT:-10000}
 
   frontend:
     build:

@@ -7,6 +7,11 @@ from dotenv import load_dotenv
 from routes.product_routes import product_routes
 from routes.file_routes import file_routes
 from routes.devops_routes import devops_routes
+from prometheus_flask_exporter import PrometheusMetrics
+from prometheus_client import Gauge
+from kubernetes import client, config
+import threading
+import time
 
 # OpenTelemetry imports
 from opentelemetry import trace
@@ -76,6 +81,44 @@ port = int(os.environ.get("PORT", 10000))  # 10000 es el valor por defecto si no
 
 app = Flask(__name__)
 CORS(app)
+
+# Enable Prometheus metrics
+metrics = PrometheusMetrics(app)
+# Add custom metrics info
+metrics.info('app_info', 'Application info', version='1.0.0')
+
+# Custom Gauge for backend pod restarts
+backend_restarts_gauge = Gauge('backend_pod_restarts_total', 'Total number of backend pod restarts')
+
+def update_restart_count():
+    """Background thread to update restart count metric from Kubernetes API"""
+    try:
+        # Load in-cluster config
+        config.load_incluster_config()
+        v1 = client.CoreV1Api()
+        
+        while True:
+            try:
+                # Get all pods with label app=backend
+                pods = v1.list_namespaced_pod(namespace='default', label_selector='app=backend')
+                total_restarts = sum(
+                    container.restart_count 
+                    for pod in pods.items 
+                    for container in pod.status.container_statuses or []
+                )
+                backend_restarts_gauge.set(total_restarts)
+                logger.info(f"Updated backend restart count: {total_restarts}")
+            except Exception as e:
+                logger.error(f"Error updating restart count: {e}")
+            
+            # Update every 10 seconds
+            time.sleep(10)
+    except Exception as e:
+        logger.warning(f"Could not load in-cluster config, restart metric will not be available: {e}")
+
+# Start background thread for restart count monitoring
+restart_thread = threading.Thread(target=update_restart_count, daemon=True)
+restart_thread.start()
 
 # Instrument Flask with OpenTelemetry
 FlaskInstrumentor().instrument_app(app)

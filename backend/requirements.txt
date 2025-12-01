@@ -8,6 +8,8 @@ redis
 python-dotenv
 pytest
 requests
+prometheus-flask-exporter
+kubernetes
 
 # OpenTelemetry dependencies for observability
 opentelemetry-api

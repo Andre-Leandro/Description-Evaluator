@@ -18,12 +18,13 @@ spec:
       containers:
         - name: frontend
           image: devopsregistrytp.azurecr.io/frontend:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 80
               name: http
           env:
             - name: NEXT_PUBLIC_API_URL
-              value: "http://backend:10000"
+              value: "http://localhost:30100"
           resources:
             requests:
               memory: "128Mi"
