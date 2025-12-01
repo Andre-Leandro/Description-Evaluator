@@ -1,0 +1,122 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-pvc
+  namespace: description-evaluator
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards-provider
+  namespace: description-evaluator
+data:
+  dashboards.yml: |
+    apiVersion: 1
+    providers:
+      - name: 'Default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 10
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards
+          foldersFromFilesStructure: true
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: description-evaluator
+  labels:
+    app: grafana
+    tier: observability
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+        tier: observability
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana:latest
+        env:
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          value: "admin"
+        - name: GF_SECURITY_ADMIN_USER
+          value: "admin"
+        - name: GF_INSTALL_PLUGINS
+          value: ""
+        ports:
+        - name: web
+          containerPort: 3000
+          protocol: TCP
+        volumeMounts:
+        - name: grafana-storage
+          mountPath: /var/lib/grafana
+        # - name: datasources
+        #   mountPath: /etc/grafana/provisioning/datasources
+        - name: dashboard
+          mountPath: /var/lib/grafana/dashboards
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      volumes:
+      - name: grafana-storage
+        persistentVolumeClaim:
+          claimName: grafana-pvc
+      # - name: datasources
+      #   configMap:
+      #     name: grafana-datasources
+      - name: dashboard
+        configMap:
+          name: grafana-dashboard
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: description-evaluator
+  labels:
+    app: grafana
+spec:
+  type: NodePort
+  ports:
+  - name: web
+    port: 3000
+    targetPort: 3000
+    nodePort: 30030
+    protocol: TCP
+  selector:
+    app: grafana

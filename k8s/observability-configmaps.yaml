@@ -1,0 +1,113 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: description-evaluator
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    scrape_configs:
+      # Scrape backend Flask app metrics directly
+      - job_name: 'backend'
+        static_configs:
+          - targets: ['backend:8000']
+            labels:
+              service: 'description-evaluator-backend'
+      
+      # Scrape metrics from OpenTelemetry Collector
+      - job_name: 'otel-collector'
+        static_configs:
+          - targets: ['otel-collector:8889']
+            labels:
+              service: 'otel-collector'
+      
+      # Scrape Redis exporter
+      - job_name: 'redis'
+        static_configs:
+          - targets: ['redis-exporter:9121']
+            labels:
+              service: 'redis'
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: description-evaluator
+data:
+  otel-collector-config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+    processors:
+      batch:
+        timeout: 10s
+        send_batch_size: 1024
+      
+      memory_limiter:
+        check_interval: 1s
+        limit_mib: 512
+
+    exporters:
+      prometheus:
+        endpoint: "0.0.0.0:8889"
+        namespace: "otel"
+        
+      otlp/jaeger:
+        endpoint: jaeger:4317
+        tls:
+          insecure: true
+      
+      debug:
+        verbosity: detailed
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [otlp/jaeger, debug]
+        
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [prometheus, debug]
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: description-evaluator
+data:
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        orgId: 1
+        url: http://prometheus:9090
+        uid: prometheus
+        isDefault: true
+        version: 1
+        editable: true
+        jsonData:
+          timeInterval: "5s"
+      
+      - name: Jaeger
+        type: jaeger
+        access: proxy
+        orgId: 1
+        url: http://jaeger:16686
+        uid: jaeger
+        version: 1
+        editable: true
