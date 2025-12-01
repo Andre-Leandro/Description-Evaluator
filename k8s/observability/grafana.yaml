@@ -657,17 +657,21 @@ spec:
     spec:
       containers:
         - name: grafana
-          image: grafana/grafana:latest
+          image: grafana/grafana:10.4.0
           ports:
             - containerPort: 3000
               name: http
           env:
+            # NOTE: For local development/testing only.
+            # In production, use Kubernetes secrets and disable anonymous access.
             - name: GF_SECURITY_ADMIN_USER
               value: "admin"
             - name: GF_SECURITY_ADMIN_PASSWORD
               value: "admin"
             - name: GF_USERS_ALLOW_SIGN_UP
               value: "false"
+            # Anonymous access enabled for local testing convenience
+            # Disable in production by setting to "false"
             - name: GF_AUTH_ANONYMOUS_ENABLED
               value: "true"
             - name: GF_AUTH_ANONYMOUS_ORG_ROLE

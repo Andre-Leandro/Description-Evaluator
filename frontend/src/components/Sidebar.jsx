@@ -73,7 +73,7 @@ export default function Sidebar() {
     setIsLoading(prev => ({ ...prev, crash: true }));
     try {
       const response = await fetch(`${API_URL}/api/kill-memory`, {
-        method: 'GET',
+        method: 'POST',
       });
       const data = await response.json();
       alert(`🔥 Crash Test iniciado!\n${data.message}`);

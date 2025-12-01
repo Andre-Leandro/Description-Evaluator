@@ -113,6 +113,9 @@ spec:
     app: backend
 ---
 # Optional: Create secret for database credentials
+# This secret contains placeholder values for local development.
+# For production, create the secret with actual values:
+#
 # kubectl create secret generic backend-secrets \
 #   --from-literal=db_user=your_user \
 #   --from-literal=db_password=your_password \
@@ -120,11 +123,17 @@ spec:
 #   --from-literal=db_port=5432 \
 #   --from-literal=db_name=your_db \
 #   --from-literal=redis_password=your_redis_password
+#
+# NOTE: Empty values are placeholders. The backend will work without
+# database credentials if Supabase is not configured, but will show
+# errors when attempting to access database features.
 apiVersion: v1
 kind: Secret
 metadata:
   name: backend-secrets
   namespace: default
+  annotations:
+    description: "Placeholder secret for local development. Replace with actual values in production."
 type: Opaque
 data:
   # Base64 encoded placeholder values - replace with actual values

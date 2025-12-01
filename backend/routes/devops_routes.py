@@ -13,12 +13,14 @@ redis_client = redis.Redis(
 devops_routes = Blueprint('devops', __name__)
 
 
-@devops_routes.route('/api/kill-memory', methods=['GET'])
+@devops_routes.route('/api/kill-memory', methods=['POST'])
 def kill_memory():
     """
     Chaos endpoint that aggressively consumes RAM until OOMKilled.
     This is used to test Kubernetes pod resilience and memory alerts.
     WARNING: This will crash the pod intentionally!
+    
+    Uses POST method as this is a destructive operation.
     """
     print("🔥 CHAOS TEST: Starting aggressive memory consumption...")
     
