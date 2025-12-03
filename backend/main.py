@@ -8,7 +8,7 @@ from routes.product_routes import product_routes
 from routes.file_routes import file_routes
 from routes.devops_routes import devops_routes
 from prometheus_flask_exporter import PrometheusMetrics
-from prometheus_client import Gauge
+from prometheus_client import Gauge, Counter
 from kubernetes import client, config
 import threading
 import time
@@ -82,13 +82,36 @@ port = int(os.environ.get("PORT", 10000))  # 10000 es el valor por defecto si no
 app = Flask(__name__)
 CORS(app)
 
-# Enable Prometheus metrics
+# Enable Prometheus metrics (basic)
 metrics = PrometheusMetrics(app)
-# Add custom metrics info
 metrics.info('app_info', 'Application info', version='1.0.0')
+
+# Custom Counter for HTTP requests with path label
+http_requests_by_path = Counter(
+    'http_requests_by_path_total',
+    'Total HTTP requests by path',
+    ['method', 'path', 'status']
+)
 
 # Custom Gauge for backend pod restarts
 backend_restarts_gauge = Gauge('backend_pod_restarts_total', 'Total number of backend pod restarts')
+
+# Middleware to track requests by path
+@app.before_request
+def before_request():
+    from flask import request
+    request._start_time = time.time()
+
+@app.after_request
+def after_request(response):
+    from flask import request
+    # Increment custom counter with path label
+    http_requests_by_path.labels(
+        method=request.method,
+        path=request.path,
+        status=response.status_code
+    ).inc()
+    return response
 
 def update_restart_count():
     """Background thread to update restart count metric from Kubernetes API"""

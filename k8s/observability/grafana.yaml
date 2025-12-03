@@ -345,7 +345,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "rate(flask_http_request_total[1m])",
+              "expr": "rate(http_requests_by_path_total[1m])",
               "legendFormat": "{{method}} {{path}} ({{kubernetes_pod_name}})",
               "refId": "A"
             }
@@ -439,7 +439,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "rate(flask_http_request_total{path!~\"/api/health|/metrics\"}[1m])",
+              "expr": "rate(http_requests_by_path_total{path!~\"/api/health|/metrics\"}[1m])",
               "legendFormat": "{{method}} {{path}} ({{kubernetes_pod_name}})",
               "refId": "A"
             }
