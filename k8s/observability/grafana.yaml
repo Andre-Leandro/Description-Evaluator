@@ -676,11 +676,11 @@ data:
               },
               "queryType": "traceql",
               "refId": "A",
-              "query": "{ .service.name=\"backend-service\" && name=~\"get_products|register_vote|GET /products|POST /vote\" }",
-              "limit": 50
+              "query": "{ .service.name=\"backend-service\" && name=~\"get_products|register_vote|GET /products|POST /vote|kill_memory_chaos_test|POST /api/kill-memory|clear_redis_cache|DELETE /api/cache\" }",
+              "limit": 100
             }
           ],
-          "title": "Application Traces (Products & Votes)",
+          "title": "Application Traces (All Endpoints)",
           "type": "table",
           "transformations": []
         },
