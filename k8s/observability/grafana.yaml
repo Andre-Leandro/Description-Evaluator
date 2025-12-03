@@ -251,7 +251,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "rate(container_cpu_usage_seconds_total{pod=~\"backend.*\", container=\"backend\"}[1m]) * 100",
+              "expr": "rate(container_cpu_usage_seconds_total{pod=~\"backend.*\", container=\"backend\"}[30s]) * 100",
               "legendFormat": "Pod {{pod}}",
               "refId": "A"
             }
@@ -345,7 +345,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "rate(http_requests_by_path_total[1m])",
+              "expr": "rate(http_requests_by_path_total[30s])",
               "legendFormat": "{{method}} {{path}} ({{kubernetes_pod_name}})",
               "refId": "A"
             }
@@ -439,7 +439,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "rate(http_requests_by_path_total{path!~\"/api/health|/metrics\"}[1m])",
+              "expr": "rate(http_requests_by_path_total{path!~\"/api/health|/metrics\"}[30s])",
               "legendFormat": "{{method}} {{path}} ({{kubernetes_pod_name}})",
               "refId": "A"
             }
@@ -533,7 +533,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "histogram_quantile(0.95, rate(flask_http_request_duration_seconds_bucket[5m]))",
+              "expr": "histogram_quantile(0.95, rate(flask_http_request_duration_seconds_bucket[30s]))",
               "legendFormat": "p95 Latency",
               "refId": "A"
             },
@@ -542,7 +542,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "histogram_quantile(0.50, rate(flask_http_request_duration_seconds_bucket[5m]))",
+              "expr": "histogram_quantile(0.50, rate(flask_http_request_duration_seconds_bucket[30s]))",
               "legendFormat": "p50 Latency",
               "refId": "B"
             }
@@ -733,7 +733,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "rate(flask_http_request_total{path=\"/products\"}[1m]) * 60",
+              "expr": "rate(flask_http_request_total{path=\"/products\"}[30s]) * 60",
               "legendFormat": "GET /products",
               "refId": "A"
             },
@@ -742,7 +742,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "rate(flask_http_request_total{path=\"/vote\"}[1m]) * 60",
+              "expr": "rate(flask_http_request_total{path=\"/vote\"}[30s]) * 60",
               "legendFormat": "POST /vote",
               "refId": "B"
             }
@@ -836,7 +836,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "histogram_quantile(0.95, rate(flask_http_request_duration_seconds_bucket{path=\"/products\"}[5m]))",
+              "expr": "histogram_quantile(0.95, rate(flask_http_request_duration_seconds_bucket{path=\"/products\"}[30s]))",
               "legendFormat": "GET /products (p95)",
               "refId": "A"
             },
@@ -845,7 +845,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "histogram_quantile(0.95, rate(flask_http_request_duration_seconds_bucket{path=\"/vote\"}[5m]))",
+              "expr": "histogram_quantile(0.95, rate(flask_http_request_duration_seconds_bucket{path=\"/vote\"}[30s]))",
               "legendFormat": "POST /vote (p95)",
               "refId": "B"
             }
