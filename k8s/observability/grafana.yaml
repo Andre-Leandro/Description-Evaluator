@@ -509,9 +509,9 @@ data:
           },
           "gridPos": {
             "h": 8,
-            "w": 24,
+            "w": 12,
             "x": 0,
-            "y": 16
+            "y": 12
           },
           "id": 4,
           "options": {
@@ -533,8 +533,8 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "histogram_quantile(0.95, rate(flask_http_request_duration_seconds_bucket[30s]))",
-              "legendFormat": "p95 Latency",
+              "expr": "histogram_quantile(0.95, sum(rate(flask_http_request_duration_seconds_bucket[30s])) by (le))",
+              "legendFormat": "p95 Latency (All Requests)",
               "refId": "A"
             },
             {
@@ -542,12 +542,109 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "histogram_quantile(0.50, rate(flask_http_request_duration_seconds_bucket[30s]))",
-              "legendFormat": "p50 Latency",
+              "expr": "histogram_quantile(0.50, sum(rate(flask_http_request_duration_seconds_bucket[30s])) by (le))",
+              "legendFormat": "p50 Latency (All Requests)",
               "refId": "B"
             }
           ],
-          "title": "Request Latency",
+          "title": "Request Latency - Global",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Latency (seconds)",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 12
+          },
+          "id": 10,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "histogram_quantile(0.95, sum(rate(flask_http_request_duration_seconds_bucket[30s])) by (le, path))",
+              "legendFormat": "p95 - {{path}}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "histogram_quantile(0.50, sum(rate(flask_http_request_duration_seconds_bucket[30s])) by (le, path))",
+              "legendFormat": "p50 - {{path}}",
+              "refId": "B"
+            }
+          ],
+          "title": "Request Latency - By Endpoint",
           "type": "timeseries"
         },
         {
@@ -586,169 +683,6 @@ data:
           "title": "Application Traces (Products & Votes)",
           "type": "table",
           "transformations": []
-        },
-        {
-          "datasource": {
-            "type": "tempo",
-            "uid": "tempo"
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 36
-          },
-          "id": 7,
-          "options": {
-            "showTime": true
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "tempo",
-                "uid": "tempo"
-              },
-              "queryType": "traceql",
-              "refId": "A",
-              "query": "{ .service.name=\"backend-service\" && name=\"get_products\" }",
-              "limit": 20
-            }
-          ],
-          "title": "Product Listing Traces",
-          "type": "table"
-        },
-        {
-          "datasource": {
-            "type": "tempo",
-            "uid": "tempo"
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 36
-          },
-          "id": 8,
-          "options": {
-            "showTime": true
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "tempo",
-                "uid": "tempo"
-              },
-              "queryType": "traceql",
-              "refId": "A",
-              "query": "{ .service.name=\"backend-service\" && name=\"register_vote\" }",
-              "limit": 20
-            }
-          ],
-          "title": "Vote Registration Traces",
-          "type": "table"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 12,
-            "x": 0,
-            "y": 44
-          },
-          "id": 9,
-          "options": {
-            "legend": {
-              "calcs": ["lastNotNull"],
-              "displayMode": "table",
-              "placement": "right",
-              "showLegend": true
-            },
-            "tooltip": {
-              "maxHeight": 600,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "rate(flask_http_request_total{path=\"/products\"}[30s]) * 60",
-              "legendFormat": "GET /products",
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "rate(flask_http_request_total{path=\"/vote\"}[30s]) * 60",
-              "legendFormat": "POST /vote",
-              "refId": "B"
-            }
-          ],
-          "title": "Business Endpoints - Requests per Minute",
-          "type": "timeseries"
         },
         {
           "datasource": {
@@ -813,7 +747,7 @@ data:
           "gridPos": {
             "h": 6,
             "w": 12,
-            "x": 12,
+            "x": 0,
             "y": 44
           },
           "id": 10,
@@ -885,10 +819,10 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 4,
-            "w": 6,
-            "x": 0,
-            "y": 50
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 44
           },
           "id": 6,
           "options": {
