@@ -241,6 +241,7 @@ Esto es normal en el primer despliegue. Kubernetes reiniciará automáticamente 
 - Puedes verlos en Docker Desktop en el contenedor `k3d-tp2-cluster-serverlb` con los puertos 30000, 30080 y 30100
 - Los servicios internos (Prometheus, Tempo, Redis) usan **ClusterIP** y solo son accesibles dentro del cluster
 - Si un servicio no responde, verifica que los pods estén Running con `kubectl get pods`
+- **Nombres de pods en Grafana**: Los paneles muestran nombres cortos (últimos 5 caracteres del hash) para facilitar la identificación, ej: "Backend Pod a1b2c" en lugar de "backend-7844647599-a1b2c"
 
 ### Credenciales Grafana
 
@@ -427,6 +428,30 @@ redis-cli -h redis-tp-devops.eastus.azurecontainer.io -p 6379 -a $REDIS_PASSWORD
 ---
 
 ## 🔧 Comandos Útiles
+
+### Reiniciar el Cluster después de apagar la PC
+
+Cuando inicies Docker Desktop después de apagar tu computadora, el cluster k3d estará corriendo pero algunos pods pueden estar en `CrashLoopBackOff` o no responder. Para reiniciarlos:
+
+```powershell
+# Opción 1: Reiniciar solo los servicios problemáticos (recomendado)
+kubectl rollout restart deployment backend
+kubectl rollout restart deployment otel-collector
+
+# Opción 2: Reiniciar todos los servicios de la aplicación
+kubectl rollout restart deployment backend frontend redis
+
+# Opción 3: Reiniciar todo el stack de observabilidad
+kubectl rollout restart deployment grafana prometheus tempo otel-collector
+
+# Verificar que todos los pods estén Running
+kubectl get pods
+
+# Eliminar pods viejos si quedan en estado problemático
+kubectl delete pod <nombre-del-pod>
+```
+
+**💡 Tip**: Después de reiniciar, espera 30-60 segundos para que todos los pods vuelvan a estar `Ready 1/1` antes de acceder a las aplicaciones.
 
 ### k3d
 
