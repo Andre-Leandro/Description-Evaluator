@@ -13,7 +13,6 @@ graph TB
             SERVER["🎯 k3d-tp2-cluster-server-0<br/>ROLE: control-plane, master<br/>IP: 172.18.0.2"]
 
             subgraph "Pods en Server Node"
-                BACK1["backend-965f5ff86-ms6zt<br/>📦 Replica 1<br/>IP: 10.42.0.39"]
                 FRONT["frontend-7d8dd94ccf-64k5s<br/>🌐 Next.js UI<br/>IP: 10.42.0.32"]
                 GRAF["grafana-68cd4bdbbb-bnv2n<br/>📈 Visualización<br/>IP: 10.42.0.40"]
                 SVCLB1["svclb-traefik<br/>⚖️ Load Balancer<br/>IP: 10.42.0.30"]
@@ -24,7 +23,7 @@ graph TB
             AGENT0["🔧 k3d-tp2-cluster-agent-0<br/>ROLE: worker<br/>IP: 172.18.0.5"]
 
             subgraph "Pods en Agent-0"
-                BACK2["backend-965f5ff86-q9b86<br/>📦 Replica 2<br/>IP: 10.42.2.37"]
+                BACK1["backend-7d5675b4f8-rmmpl<br/>📦 Replica 1<br/>IP: 10.42.2.54"]
                 OTEL["otel-collector<br/>🔭 Telemetry<br/>IP: 10.42.2.38"]
                 REDIS["redis-6fbd565ddb-bgm6l<br/>💾 Cache<br/>IP: 10.42.2.32"]
                 TEMPO["tempo-7555f6bd7d-dvc7v<br/>🔍 Traces<br/>IP: 10.42.2.33"]
@@ -38,6 +37,7 @@ graph TB
             AGENT1["🔧 k3d-tp2-cluster-agent-1<br/>ROLE: worker<br/>IP: 172.18.0.3"]
 
             subgraph "Pods en Agent-1"
+                BACK2["backend-7d5675b4f8-79lvx<br/>📦 Replica 2<br/>IP: 10.42.1.43"]
                 KSMTX["kube-state-metrics<br/>📊 K8s Metrics<br/>IP: 10.42.1.24"]
                 PROM["prometheus-75f754f445-s69xl<br/>📉 Time Series DB<br/>IP: 10.42.1.23"]
                 LOCALPATH["local-path-provisioner<br/>💿 Storage<br/>IP: 10.42.1.19"]
@@ -163,7 +163,6 @@ sequenceDiagram
 
 | Pod                       | Tipo           | Replicas | Puerto | Propósito                  |
 | ------------------------- | -------------- | -------- | ------ | -------------------------- |
-| backend-965f5ff86-ms6zt   | Application    | 1/2      | 10000  | Flask API - Replica 1      |
 | frontend-7d8dd94ccf-64k5s | Application    | 1/1      | 80     | Next.js UI                 |
 | grafana-68cd4bdbbb-bnv2n  | Observability  | 1/1      | 3000   | Visualización de métricas  |
 | svclb-traefik             | Infrastructure | 2/2      | -      | Load balancer para Traefik |
@@ -172,8 +171,9 @@ sequenceDiagram
 
 - ✅ Roles: `control-plane`, `master`
 - ✅ Maneja el API Server de Kubernetes
-- ✅ Aloja 1 réplica del backend para HA
-- ✅ Frontend concentrado aquí para acceso rápido
+- ✅ **NO aloja backends** (scheduler prefiere workers puros)
+- ✅ Frontend y Grafana para acceso rápido
+- ✅ Reserva recursos para control plane
 
 ---
 
@@ -181,7 +181,7 @@ sequenceDiagram
 
 | Pod                             | Tipo           | Replicas | Puerto | Propósito                  |
 | ------------------------------- | -------------- | -------- | ------ | -------------------------- |
-| backend-965f5ff86-q9b86         | Application    | 1/2      | 10000  | Flask API - Replica 2      |
+| backend-7d5675b4f8-rmmpl        | Application    | 1/2      | 10000  | Flask API - Replica 1      |
 | otel-collector-5d8f5777cb-sl8mm | Observability  | 1/1      | 4317   | Pipeline de telemetría     |
 | redis-6fbd565ddb-bgm6l          | Database       | 1/1      | 6379   | Cache en memoria           |
 | tempo-7555f6bd7d-dvc7v          | Observability  | 1/1      | 3100   | Almacenamiento de trazas   |
@@ -194,7 +194,7 @@ sequenceDiagram
 - ✅ Worker node principal
 - ✅ Mayor concentración de pods (7 pods)
 - ✅ Contiene toda la infraestructura de storage (Redis, Tempo)
-- ✅ Segunda réplica del backend para HA
+- ✅ **Primera réplica del backend** (podAntiAffinity garantiza distribución)
 
 ---
 
@@ -202,6 +202,7 @@ sequenceDiagram
 
 | Pod                                 | Tipo           | Replicas | Puerto | Propósito                  |
 | ----------------------------------- | -------------- | -------- | ------ | -------------------------- |
+| backend-7d5675b4f8-79lvx            | Application    | 1/2      | 10000  | Flask API - Replica 2      |
 | kube-state-metrics-5fc5c89cdf-mmvvb | Observability  | 1/1      | 8080   | Métricas de estado de K8s  |
 | prometheus-75f754f445-s69xl         | Observability  | 1/1      | 9090   | Time-series database       |
 | local-path-provisioner              | Infrastructure | 1/1      | -      | Provisioner de volúmenes   |
@@ -211,6 +212,7 @@ sequenceDiagram
 **Características:**
 
 - ✅ Worker node secundario
+- ✅ **Segunda réplica del backend** (podAntiAffinity garantiza distribución)
 - ✅ Dedicado a observabilidad (Prometheus, kube-state-metrics)
 - ✅ Maneja el ingress (Traefik)
 - ✅ Storage provisioning
@@ -223,8 +225,8 @@ sequenceDiagram
 graph TB
     subgraph "HA Backend - 2 Replicas"
         direction LR
-        B1["Backend Pod 1<br/>server-0<br/>10.42.0.39"]
-        B2["Backend Pod 2<br/>agent-0<br/>10.42.2.37"]
+        B1["Backend Pod 1<br/>agent-0<br/>10.42.2.54"]
+        B2["Backend Pod 2<br/>agent-1<br/>10.42.1.43"]
     end
 
     subgraph "Load Balancing"
@@ -250,11 +252,12 @@ graph TB
 
 **Garantías de HA:**
 
-1. **2 réplicas del backend** distribuidas en nodos diferentes
-2. **Readiness probes cada 5s** - Tráfico solo a pods sanos
-3. **Liveness probes cada 10s** - Auto-restart si falla
-4. **NodePort Service** con balanceo round-robin automático
-5. **Anti-affinity implícito** - Kubernetes distribuye pods en nodos diferentes cuando es posible
+1. **2 réplicas del backend** distribuidas en nodos diferentes (agent-0 y agent-1)
+2. **podAntiAffinity explícito** - `requiredDuringSchedulingIgnoredDuringExecution` garantiza que nunca haya 2 backends en el mismo nodo
+3. **Readiness probes cada 5s** - Tráfico solo a pods sanos
+4. **Liveness probes cada 10s** - Auto-restart si falla
+5. **NodePort Service** con balanceo round-robin automático
+6. **Resiliencia a nivel de nodo** - Si un worker cae, el pod se recrea automáticamente en otro nodo disponible
 
 ---
 
