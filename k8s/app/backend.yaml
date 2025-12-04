@@ -36,7 +36,7 @@ metadata:
   labels:
     app: backend
 spec:
-  replicas: 2 # High Availability: 2 pods distributed across different nodes
+  replicas: 3 # High Availability: 2 pods distributed across different nodes
   selector:
     matchLabels:
       app: backend
