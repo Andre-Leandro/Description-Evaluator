@@ -92,13 +92,12 @@ graph LR
 
     FRONT -->|REST API| BACK
     BACK -->|Cache| REDIS
-    BACK -->|Traces/Metrics| OTEL
+    BACK -->|Traces OTLP| OTEL
 
     OTEL -->|Export Traces| TEMPO
-    OTEL -->|Export Metrics| PROM
 
     PROM -->|Scrape /metrics| BACK
-    PROM -->|Scrape| KSMTX
+    PROM -->|Scrape /metrics| KSMTX
 
     GRAF -->|Query Metrics| PROM
     GRAF -->|Query Traces| TEMPO
@@ -140,7 +139,6 @@ sequenceDiagram
         B1->>O: Send Trace<br/>(OTLP:4317)
         B1->>B1: Expose /metrics<br/>(prometheus_flask_exporter)
         O->>T: Export Trace
-        O->>P: Export Metric
         P->>B1: Scrape /metrics<br/>(every 5s)
     end
 
