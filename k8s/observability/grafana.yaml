@@ -439,7 +439,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "rate(http_requests_by_path_total{path!~\"/api/health|/metrics\"}[30s])",
+              "expr": "rate(http_requests_by_path_total{path!~\"/health|/metrics\"}[30s])",
               "legendFormat": "{{method}} {{path}} ({{kubernetes_pod_name}})",
               "refId": "A"
             }
@@ -676,7 +676,7 @@ data:
               },
               "queryType": "traceql",
               "refId": "A",
-              "query": "{ .service.name=\"backend-service\" && name=~\"get_products|register_vote|GET /products|POST /vote|kill_memory_chaos_test|POST /api/kill-memory|clear_redis_cache|DELETE /api/cache\" }",
+              "query": "{ .service.name=\"backend-service\" && name=~\"get_products|register_vote|GET /products|POST /vote|kill_memory_chaos_test|POST /kill-memory|clear_redis_cache|DELETE /cache|get_pod_info|GET /pod-info\" }",
               "limit": 100
             }
           ],

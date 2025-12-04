@@ -3,9 +3,15 @@ import redis
 import os
 import threading
 import time
+import random
 from opentelemetry import trace
 
 tracer = trace.get_tracer(__name__)
+
+# Generate a unique pod identifier at startup (lives only during pod execution)
+ADJECTIVES = ["Brave", "Swift", "Mighty", "Noble", "Wise", "Bold", "Silent", "Fierce", "Cosmic", "Thunder"]
+NOUNS = ["Falcon", "Phoenix", "Tiger", "Dragon", "Wolf", "Eagle", "Panther", "Lion", "Hawk", "Bear"]
+POD_IDENTIFIER = f"{random.choice(ADJECTIVES)}-{random.choice(NOUNS)}-{random.randint(100, 999)}"
 
 redis_client = redis.Redis(
     host=os.getenv("REDIS_HOST", "127.0.0.1"),
@@ -16,7 +22,7 @@ redis_client = redis.Redis(
 devops_routes = Blueprint('devops', __name__)
 
 
-@devops_routes.route('/api/kill-memory', methods=['POST'])
+@devops_routes.route('/kill-memory', methods=['POST'])
 def kill_memory():
     """
     Chaos endpoint that aggressively consumes RAM until OOMKilled.
@@ -66,7 +72,7 @@ def kill_memory():
         }), 200
 
 
-@devops_routes.route('/api/cache', methods=['DELETE'])
+@devops_routes.route('/cache', methods=['DELETE'])
 def clear_cache():
     """
     Cleanup endpoint that executes FLUSHALL on Redis.
@@ -111,7 +117,7 @@ def clear_cache():
             }), 500
 
 
-@devops_routes.route('/api/health', methods=['GET'])
+@devops_routes.route('/health', methods=['GET'])
 def health_check():
     """
     Health check endpoint for Kubernetes probes.
@@ -131,3 +137,32 @@ def health_check():
     
     status_code = 200 if health["status"] == "healthy" else 503
     return jsonify(health), status_code
+
+
+@devops_routes.route('/pod-info', methods=['GET'])
+def pod_info():
+    """
+    Returns unique pod identifier to demonstrate load balancing and HA.
+    Each pod generates a random identifier at startup that persists during execution.
+    Useful for testing:
+    - Load balancing: Multiple requests show different pod identifiers
+    - High Availability: After pod restart, new identifier is generated
+    """
+    with tracer.start_as_current_span("get_pod_info") as span:
+        span.set_attribute("pod.identifier", POD_IDENTIFIER)
+        span.set_attribute("http.method", "GET")
+        span.set_attribute("http.route", "/pod-info")
+        
+        # Get Kubernetes pod name from environment if available
+        k8s_pod_name = os.getenv("HOSTNAME", "unknown")
+        
+        response = {
+            "pod_identifier": POD_IDENTIFIER,
+            "kubernetes_pod_name": k8s_pod_name,
+            "message": f"Hello from {POD_IDENTIFIER}! 🚀"
+        }
+        
+        span.set_attribute("response.pod_identifier", POD_IDENTIFIER)
+        span.set_attribute("response.k8s_pod_name", k8s_pod_name)
+        
+        return jsonify(response), 200

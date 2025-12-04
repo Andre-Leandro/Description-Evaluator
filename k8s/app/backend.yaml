@@ -10,9 +10,9 @@ metadata:
   name: backend-pod-reader
   namespace: default
 rules:
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -24,9 +24,9 @@ roleRef:
   kind: Role
   name: backend-pod-reader
 subjects:
-- kind: ServiceAccount
-  name: backend
-  namespace: default
+  - kind: ServiceAccount
+    name: backend
+    namespace: default
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -36,7 +36,7 @@ metadata:
   labels:
     app: backend
 spec:
-  replicas: 2  # High Availability requirement
+  replicas: 2 # High Availability requirement
   selector:
     matchLabels:
       app: backend
@@ -111,18 +111,18 @@ spec:
               memory: "256Mi"
               cpu: "100m"
             limits:
-              memory: "512Mi"  # Limit for OOMKilled testing
+              memory: "512Mi" # Limit for OOMKilled testing
               cpu: "500m"
           livenessProbe:
             httpGet:
-              path: /api/health
+              path: /health
               port: 10000
             initialDelaySeconds: 15
             periodSeconds: 10
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /api/health
+              path: /health
               port: 10000
             initialDelaySeconds: 5
             periodSeconds: 5
