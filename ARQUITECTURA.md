@@ -27,8 +27,6 @@ graph TB
                 OTEL["otel-collector<br/>🔭 Telemetry<br/>IP: 10.42.2.38"]
                 REDIS["redis-6fbd565ddb-bgm6l<br/>💾 Cache<br/>IP: 10.42.2.32"]
                 TEMPO["tempo-7555f6bd7d-dvc7v<br/>🔍 Traces<br/>IP: 10.42.2.33"]
-                COREDNS["coredns<br/>🌐 DNS<br/>IP: 10.42.2.29"]
-                METRICS["metrics-server<br/>📊 Metrics<br/>IP: 10.42.2.26"]
                 SVCLB2["svclb-traefik<br/>⚖️ Load Balancer<br/>IP: 10.42.2.31"]
             end
         end
@@ -40,8 +38,6 @@ graph TB
                 BACK2["backend-7d5675b4f8-79lvx<br/>📦 Replica 2<br/>IP: 10.42.1.43"]
                 KSMTX["kube-state-metrics<br/>📊 K8s Metrics<br/>IP: 10.42.1.24"]
                 PROM["prometheus-75f754f445-s69xl<br/>📉 Time Series DB<br/>IP: 10.42.1.23"]
-                LOCALPATH["local-path-provisioner<br/>💿 Storage<br/>IP: 10.42.1.19"]
-                TRAEFIK["traefik<br/>🚪 Ingress<br/>IP: 10.42.1.18"]
                 SVCLB3["svclb-traefik<br/>⚖️ Load Balancer<br/>IP: 10.42.1.21"]
             end
         end
@@ -185,14 +181,11 @@ sequenceDiagram
 | otel-collector-5d8f5777cb-sl8mm | Observability  | 1/1      | 4317   | Pipeline de telemetría     |
 | redis-6fbd565ddb-bgm6l          | Database       | 1/1      | 6379   | Cache en memoria           |
 | tempo-7555f6bd7d-dvc7v          | Observability  | 1/1      | 3100   | Almacenamiento de trazas   |
-| coredns                         | Infrastructure | 1/1      | 53     | DNS interno                |
-| metrics-server                  | Infrastructure | 1/1      | 443    | Métricas de recursos K8s   |
 | svclb-traefik                   | Infrastructure | 2/2      | -      | Load balancer para Traefik |
 
 **Características:**
 
 - ✅ Worker node principal
-- ✅ Mayor concentración de pods (7 pods)
 - ✅ Contiene toda la infraestructura de storage (Redis, Tempo)
 - ✅ **Primera réplica del backend** (podAntiAffinity garantiza distribución)
 
@@ -205,8 +198,6 @@ sequenceDiagram
 | backend-7d5675b4f8-79lvx            | Application    | 1/2      | 10000  | Flask API - Replica 2      |
 | kube-state-metrics-5fc5c89cdf-mmvvb | Observability  | 1/1      | 8080   | Métricas de estado de K8s  |
 | prometheus-75f754f445-s69xl         | Observability  | 1/1      | 9090   | Time-series database       |
-| local-path-provisioner              | Infrastructure | 1/1      | -      | Provisioner de volúmenes   |
-| traefik-5d45fc8cc9-vv8hg            | Infrastructure | 1/1      | 80/443 | Ingress controller         |
 | svclb-traefik                       | Infrastructure | 2/2      | -      | Load balancer para Traefik |
 
 **Características:**
@@ -214,8 +205,7 @@ sequenceDiagram
 - ✅ Worker node secundario
 - ✅ **Segunda réplica del backend** (podAntiAffinity garantiza distribución)
 - ✅ Dedicado a observabilidad (Prometheus, kube-state-metrics)
-- ✅ Maneja el ingress (Traefik)
-- ✅ Storage provisioning
+- ✅ Stack de métricas concentrado aquí
 
 ---
 
