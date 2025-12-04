@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Menu, 
-  X, 
-  ChevronRight, 
-  GitCompare, 
-  Star, 
-  BarChart2, 
-  Upload, 
+import {
+  Menu,
+  X,
+  ChevronRight,
+  GitCompare,
+  Star,
+  BarChart2,
+  Upload,
   Home,
   Download,
   Flame,
@@ -20,28 +20,28 @@ import { usePathname } from 'next/navigation';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:10000';
 
 const navItems = [
-  { 
-    name: 'Inicio', 
-    path: '/', 
+  {
+    name: 'Inicio',
+    path: '/',
     icon: <Home className="w-5 h-5" />
   },
-  { 
-    name: 'Cargar Datos', 
+  {
+    name: 'Cargar Datos',
     path: '/subir-csv',
     icon: <Upload className="w-5 h-5" />
   },
-  { 
-    name: 'Evaluación', 
+  {
+    name: 'Evaluación',
     path: '/comparacion',
     icon: <GitCompare className="w-5 h-5" />
   },
-  { 
-    name: 'Resultados', 
+  {
+    name: 'Resultados',
     path: '/resultados',
     icon: <BarChart2 className="w-5 h-5" />
   },
-  { 
-    name: 'Descargar CSV', 
+  {
+    name: 'Descargar CSV',
     path: '/descargar-csv',
     icon: <Download className="w-5 h-5" />
   },
@@ -72,7 +72,7 @@ export default function Sidebar() {
     }
     setIsLoading(prev => ({ ...prev, crash: true }));
     try {
-      const response = await fetch(`${API_URL}/api/kill-memory`, {
+      const response = await fetch(`${API_URL}/kill-memory`, {
         method: 'POST',
       });
       const data = await response.json();
@@ -90,7 +90,7 @@ export default function Sidebar() {
     }
     setIsLoading(prev => ({ ...prev, cache: true }));
     try {
-      const response = await fetch(`${API_URL}/api/cache`, {
+      const response = await fetch(`${API_URL}/cache`, {
         method: 'DELETE',
       });
       const data = await response.json();
@@ -144,18 +144,17 @@ export default function Sidebar() {
       <nav className="flex-1 overflow-hidden hover:overflow-y-auto">
         <ul className="space-y-1 p-2 pr-1">
           {navItems.map((item) => {
-            const isActive = pathname === item.path || 
-                          (item.path !== '/' && pathname.startsWith(item.path));
-            
+            const isActive = pathname === item.path ||
+              (item.path !== '/' && pathname.startsWith(item.path));
+
             return (
               <li key={item.path} className="group">
                 <Link
                   href={item.path}
-                  className={`flex items-center p-3 rounded-md transition-colors ${
-                    isActive
-                      ? 'bg-[#5A8CD3] text-white'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                  className={`flex items-center p-3 rounded-md transition-colors ${isActive
+                    ? 'bg-[#5A8CD3] text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                    }`}
                 >
                   <span className={`w-6 flex-shrink-0 flex items-center justify-center`}>
                     {React.cloneElement(item.icon, {
@@ -165,13 +164,13 @@ export default function Sidebar() {
                   <span className={`ml-3 transition-opacity duration-200 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100'}`}>
                     {item.name}
                   </span>
-                  
+
                 </Link>
               </li>
             );
           })}
         </ul>
-        
+
         {/* DevOps Control Section */}
         <div className={`border-t border-gray-200 mt-2 pt-2 px-2 ${isCollapsed ? 'hidden' : ''}`}>
           <p className="text-xs text-gray-400 uppercase tracking-wider mb-2 px-3">DevOps Tests</p>
@@ -184,7 +183,7 @@ export default function Sidebar() {
               <Flame className="w-5 h-5" />
             </span>
             <span className="ml-3">
-              {isLoading.crash ? 'Ejecutando...' : '🔥 Crash Test'}
+              {isLoading.crash ? 'Ejecutando...' : 'Crash Test'}
             </span>
           </button>
           <button
@@ -196,11 +195,11 @@ export default function Sidebar() {
               <Trash2 className="w-5 h-5" />
             </span>
             <span className="ml-3">
-              {isLoading.cache ? 'Vaciando...' : '🗑️ Vaciar Redis'}
+              {isLoading.cache ? 'Vaciando...' : 'Vaciar Redis'}
             </span>
           </button>
         </div>
-        
+
         {/* Collapsed state DevOps buttons */}
         {isCollapsed && (
           <div className="border-t border-gray-200 mt-2 pt-2 px-2">
